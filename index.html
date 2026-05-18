@@ -1,0 +1,3141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>识谱大师 — 五线谱练习</title>
+<style>
+/* ========== CSS Variables — Premium Music Theme ========== */
+:root {
+  --bg: #0a0a14;
+  --bg2: #12121e;
+  --bg3: #1a1a2e;
+  --bg-card: rgba(26, 26, 46, 0.6);
+  --bg-glass: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.08);
+  --border-glow: rgba(108,99,255,0.3);
+  --text: #e8e8f0;
+  --text2: #9898b8;
+  --text3: #555570;
+  --primary: #6c63ff;
+  --primary2: #8b83ff;
+  --primary-glow: rgba(108,99,255,0.15);
+  --success: #4ade80;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --info: #60a5fa;
+  --purple: #a78bfa;
+  --pink: #f472b6;
+  --cyan: #22d3ee;
+  --gold: #f59e0b;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 30px rgba(108,99,255,0.15);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+}
+
+/* ========== Reset ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--primary2); text-decoration: none; }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; background: none; }
+input, select { font-family: inherit; outline: none; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ========== Layout ========== */
+.app-container { display: flex; min-height: 100vh; }
+
+/* ========== Sidebar — Glassmorphism ========== */
+.sidebar {
+  width: 220px;
+  background: rgba(18, 18, 30, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.sidebar-header h1 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #8b83ff, #22d3ee, #f472b6, #f59e0b);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease infinite;
+  letter-spacing: -0.5px;
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.sidebar-header .subtitle {
+  font-size: 0.7rem;
+  color: var(--text3);
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.sidebar-nav { flex: 1; padding: 12px; overflow-y: auto; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 0.85rem;
+  transition: var(--transition);
+  margin-bottom: 2px;
+  cursor: pointer;
+  position: relative;
+}
+.nav-item:hover { color: var(--text); background: var(--bg-glass); }
+.nav-item.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(34,211,238,0.1));
+  border: 1px solid var(--border-glow);
+  box-shadow: var(--shadow-glow);
+}
+.nav-item .icon { font-size: 1rem; width: 22px; text-align: center; }
+.nav-group-title {
+  font-size: 0.65rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 16px 14px 6px;
+  font-weight: 600;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 220px;
+  padding: 28px;
+  max-width: 1100px;
+}
+
+/* ========== Cards — Glassmorphism ========== */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: var(--transition);
+}
+.card:hover {
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+
+/* ========== Buttons ========== */
+.btn, .nav-item, .mode-card, .diff-card, .toggle, .answer-btn {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(108,99,255,0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(108,99,255,0.4);
+}
+.btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary2); background: var(--primary-glow); }
+.btn-sm { padding: 6px 14px; font-size: 0.78rem; }
+.btn-lg { padding: 14px 32px; font-size: 0.95rem; }
+
+/* ========== Grid ========== */
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ========== Page Header ========== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.page-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+.page-desc { color: var(--text2); font-size: 0.82rem; margin-top: 4px; }
+
+/* ========== Stat Cards — Animated Gradient Border ========== */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan), var(--pink));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-card .stat-icon { font-size: 1.3rem; margin-bottom: 8px; }
+.stat-card .stat-number {
+  font-size: 1.7rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary2), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+}
+.stat-card .stat-label { font-size: 0.72rem; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ========== Badges ========== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.badge-primary { background: var(--primary-glow); color: var(--primary2); border: 1px solid rgba(108,99,255,0.2); }
+.badge-success { background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.2); }
+.badge-danger { background: rgba(248,113,113,0.12); color: var(--danger); }
+.badge-warning { background: rgba(251,191,36,0.12); color: var(--warning); }
+.badge-level {
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  color: #fff;
+  padding: 4px 14px;
+  font-weight: 700;
+}
+
+/* ========== Level Bar ========== */
+.level-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.level-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--cyan), var(--pink));
+  background-size: 200% 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: barGlow 2s ease infinite;
+}
+@keyframes barGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ========== Practice Area ========== */
+.practice-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Practice Bar */
+.practice-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 560px;
+  padding: 10px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+.practice-bar .stat-item { display: flex; align-items: center; gap: 6px; color: var(--text2); }
+.practice-bar .stat-value { font-weight: 700; font-size: 1rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.practice-bar .timer .stat-value { color: var(--warning); }
+.practice-bar .combo .stat-value { color: var(--pink); }
+
+/* Score Display — Concert Stage Feel */
+.score-display {
+  background: linear-gradient(180deg, rgba(18,18,30,0.95), rgba(10,10,20,0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 36px;
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 560px;
+  position: relative;
+  overflow: visible;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 32px rgba(0,0,0,0.4);
+}
+.score-display::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(108,99,255,0.3), transparent);
+}
+.score-display svg { max-width: 100%; height: auto; }
+.score-display .hint {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 0.72rem;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+}
+
+/* Practice Hint Bar */
+.practice-hint-bar {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  max-width: 560px;
+  font-size: 0.82rem;
+}
+.hint-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text2);
+  user-select: none;
+  transition: color 0.2s;
+}
+.hint-toggle:hover { color: var(--text); }
+.hint-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ========== Answer Options ========== */
+.answer-options {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 560px;
+}
+.answer-btn {
+  padding: 14px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: center;
+  transition: var(--transition);
+  border: 2px solid var(--border);
+  background: linear-gradient(180deg, rgba(26,26,46,0.8), rgba(20,20,35,0.9));
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
+.answer-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.08), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.answer-btn:hover::before { opacity: 1; }
+.answer-btn:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+.answer-btn.correct {
+  border-color: var(--success);
+  background: rgba(74,222,128,0.12);
+  color: var(--success);
+  animation: popIn 0.3s ease;
+}
+.answer-btn.wrong {
+  border-color: var(--danger);
+  background: rgba(248,113,113,0.12);
+  color: var(--danger);
+  animation: shake 0.4s ease;
+}
+.answer-btn:disabled { cursor: default; opacity: 0.5; }
+.answer-btn:disabled:hover { transform: none; box-shadow: none; }
+
+@keyframes popIn {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ========== Mode & Difficulty Cards ========== */
+.mode-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.mode-card {
+  padding: 18px;
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.mode-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+.mode-card.active {
+  border-color: var(--primary);
+  background: var(--primary-glow);
+  box-shadow: var(--shadow-glow);
+}
+.mode-card .mode-icon { font-size: 1.4rem; margin-bottom: 6px; }
+.mode-card .mode-name { font-weight: 700; font-size: 0.88rem; }
+.mode-card .mode-desc { font-size: 0.72rem; color: var(--text2); margin-top: 4px; }
+
+.difficulty-cards { display: flex; gap: 10px; flex-wrap: wrap; }
+.diff-card {
+  flex: 1;
+  min-width: 100px;
+  padding: 14px;
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.diff-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.diff-card.active {
+  border-color: var(--primary);
+  background: var(--primary-glow);
+  box-shadow: var(--shadow-glow);
+}
+.diff-card .diff-level { font-size: 1.1rem; margin-bottom: 4px; }
+.diff-card .diff-name { font-weight: 700; font-size: 0.82rem; }
+.diff-card .diff-desc { font-size: 0.68rem; color: var(--text3); margin-top: 2px; }
+
+/* ========== Toggle Switch ========== */
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--bg3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid var(--border);
+}
+.toggle.active { background: var(--primary); border-color: var(--primary); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: var(--transition);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.toggle.active::after { left: 22px; }
+
+/* ========== Settings ========== */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 0.88rem; font-weight: 500; }
+.setting-desc { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+
+/* ========== Piano Keyboard — Concert Grand ========== */
+.piano-container {
+  width: 100%;
+  max-width: 560px;
+  overflow-x: auto;
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+}
+.piano {
+  position: relative;
+  height: 100px;
+  user-select: none;
+  background: linear-gradient(180deg, #2a1a0a, #1a0f05);
+  border-radius: 0 0 8px 8px;
+  padding: 4px 6px 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.piano {
+  position: relative;
+  height: 100px;
+  user-select: none;
+}
+.piano .white-key {
+  position: absolute;
+  width: 36px;
+  height: 100px;
+  background: linear-gradient(180deg, #f8f8f8, #e8e8e8);
+  border: 1px solid #bbb;
+  border-radius: 0 0 6px 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+  z-index: 1;
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.05);
+}
+.piano .white-key:hover { background: linear-gradient(180deg, #eee, #ddd); }
+.piano .white-key.active {
+  background: linear-gradient(180deg, var(--primary2), var(--primary));
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(108,99,255,0.4);
+}
+.piano .white-key .key-label {
+  position: absolute;
+  bottom: 6px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.6rem;
+  color: #888;
+  pointer-events: none;
+  font-weight: 600;
+}
+.piano .white-key.active .key-label { color: #fff; }
+.piano .black-key {
+  position: absolute;
+  width: 22px;
+  height: 62px;
+  background: linear-gradient(180deg, #333, #111);
+  border: 1px solid #000;
+  border-radius: 0 0 4px 4px;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: inset 0 -2px 4px rgba(255,255,255,0.05);
+}
+.piano .black-key:hover { background: linear-gradient(180deg, #444, #222); }
+.piano .black-key.active {
+  background: linear-gradient(180deg, var(--primary), #4440aa);
+  box-shadow: 0 0 10px rgba(108,99,255,0.5);
+}
+
+/* ========== Results Panel ========== */
+.results-panel { text-align: center; padding: 30px 20px; }
+.results-panel .result-icon { font-size: 3rem; margin-bottom: 12px; }
+.results-panel .result-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+.results-panel .result-subtitle { color: var(--text2); margin-bottom: 24px; font-size: 0.85rem; }
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.result-stat .result-stat-value { font-size: 1.5rem; font-weight: 800; }
+.result-stat .result-stat-label { font-size: 0.75rem; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ========== Heatmap ========== */
+.heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-xs);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+.heatmap-cell .note-name { font-size: 0.85rem; }
+.heatmap-cell .note-pct { font-size: 0.62rem; opacity: 0.8; }
+
+/* ========== Weak Notes ========== */
+.weak-note-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.weak-note-item:last-child { border-bottom: none; }
+.weak-note-name {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.weak-note-bar { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.weak-note-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+/* ========== Calendar Heatmap ========== */
+.calendar-heatmap { display: flex; gap: 3px; flex-wrap: wrap; }
+.calendar-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--bg3);
+  transition: var(--transition);
+}
+.calendar-cell.level-1 { background: rgba(108,99,255,0.2); }
+.calendar-cell.level-2 { background: rgba(108,99,255,0.4); }
+.calendar-cell.level-3 { background: rgba(108,99,255,0.6); }
+.calendar-cell.level-4 { background: var(--primary); }
+
+/* ========== Progress Bar ========== */
+.progress-bar { width: 100%; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--success));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ========== Plan Items ========== */
+.plan-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  border-left: 3px solid var(--primary);
+  transition: var(--transition);
+}
+.plan-item:hover { background: rgba(108,99,255,0.06); transform: translateX(4px); }
+.plan-item .plan-icon { font-size: 1.2rem; }
+.plan-item .plan-info { flex: 1; }
+.plan-item .plan-title { font-weight: 600; font-size: 0.88rem; }
+.plan-item .plan-desc { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+.plan-item .plan-meta { display: flex; gap: 12px; font-size: 0.7rem; color: var(--text3); margin-top: 4px; }
+
+/* ========== Charts ========== */
+.chart-container { width: 100%; height: 250px; position: relative; }
+
+/* ========== Combo Flash ========== */
+.combo-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 900;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 999;
+  text-shadow: 0 0 30px var(--pink), 0 0 60px rgba(244,114,182,0.3);
+  letter-spacing: 2px;
+}
+.combo-flash.show { animation: comboFlash 0.6s ease-out; }
+@keyframes comboFlash {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+/* Speed Badge */
+.speed-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  z-index: 10;
+}
+.speed-badge.lightning { background: var(--warning); color: #000; }
+.speed-badge.instant { background: var(--pink); color: #fff; }
+
+/* ========== Pages ========== */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s ease; }
+
+/* ========== Animations ========== */
+.fade-in { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.slide-up { animation: slideUp 0.4s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== Toast ========== */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+.toast-success { background: rgba(74,222,128,0.9); color: #000; }
+.toast-error { background: rgba(248,113,113,0.9); color: #fff; }
+.toast-info { background: rgba(96,165,250,0.9); color: #fff; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+/* ========== Mobile ========== */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 101;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 1.2rem;
+  align-items: center;
+  justify-content: center;
+}
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 16px; }
+  .mobile-menu-btn { display: flex; }
+  .answer-options { grid-template-columns: repeat(4, 1fr); }
+  .results-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ========== Background Ambient Effect ========== */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse at 15% 30%, rgba(108,99,255,0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 20%, rgba(34,211,238,0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 90%, rgba(244,114,182,0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 70% 60%, rgba(245,158,11,0.02) 0%, transparent 30%);
+  pointer-events: none;
+  z-index: -1;
+  animation: ambientDrift 20s ease-in-out infinite alternate;
+}
+@keyframes ambientDrift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(30px, -20px) rotate(2deg); }
+}
+
+/* Floating music notes background */
+body::after {
+  content: '♩ ♪ ♫ ♬ ♭ ♮ ♯';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-size: 2rem;
+  color: rgba(108,99,255,0.015);
+  letter-spacing: 80px;
+  line-height: 200px;
+  word-spacing: 60px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+  animation: noteFloat 30s linear infinite;
+}
+@keyframes noteFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-200px); }
+}
+
+/* Sidebar glow line */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(108,99,255,0.3), rgba(34,211,238,0.2), transparent);
+  pointer-events: none;
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>body{font-family:Inter,var(--font)}</style></head><body>
+<body>
+  <div class="app-container">
+    <!-- Mobile Menu Button -->
+    <button class="btn btn-icon mobile-menu-btn" id="mobileMenuBtn">☰</button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🎼 识谱大师</h1>
+        <div class="subtitle">Sight Reading Trainer</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">主页</div>
+        <div class="nav-item active" data-page="home">
+          <span class="icon">🏠</span>
+          <span>首页</span>
+        </div>
+        <div class="nav-group-title">练习</div>
+        <div class="nav-item" data-page="practice">
+          <span class="icon">🎵</span>
+          <span>识谱练习</span>
+        </div>
+        <div class="nav-group-title">数据</div>
+        <div class="nav-item" data-page="stats">
+          <span class="icon">📊</span>
+          <span>练习统计</span>
+        </div>
+        <div class="nav-item" data-page="plan">
+          <span class="icon">📋</span>
+          <span>练习计划</span>
+        </div>
+        <div class="nav-item" data-page="achievements">
+          <span class="icon">🏆</span>
+          <span>成就系统</span>
+        </div>
+      </nav>
+      <div style="padding:12px;font-size:0.7rem;color:var(--text3);text-align:center;border-top:1px solid var(--border)">
+        快捷键: 1-7 或 C D E F G A B
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Home Page -->
+      <div class="page active" id="page-home">
+        <div id="homeContent">
+          <div style="text-align:center;padding:60px;color:var(--text2)">
+            <div style="font-size:2rem;margin-bottom:12px">⏳</div>
+            <div>加载中...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Practice Page -->
+      <div class="page" id="page-practice">
+        <div id="practiceSetup"></div>
+        <div id="practiceArea" style="display:none"></div>
+      </div>
+
+      <!-- Stats Page -->
+      <div class="page" id="page-stats">
+        <div id="statsContent"></div>
+      </div>
+
+      <!-- Plan Page -->
+      <div class="page" id="page-plan">
+        <div id="planContent"></div>
+      </div>
+
+      <!-- Achievements Page -->
+      <div class="page" id="page-achievements">
+        <div id="achievementsContent"></div>
+      </div>
+    </main>
+  </div>
+
+    <div style="text-align:center;padding:40px;color:#fff;background:#0f0f1a;min-height:100vh">
+      <h1>请启用 JavaScript</h1>
+      <p>本应用需要 JavaScript 才能运行</p>
+    </div>
+
+<div class="toast-container"></div>
+<script>
+// ========== Music Theory Constants & Utilities ==========
+
+const NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const NOTE_COLORS = {
+  C: '#ef4444', D: '#fb923c', E: '#facc15', F: '#4ade80',
+  G: '#22d3ee', A: '#60a5fa', B: '#a78bfa'
+};
+
+// Solfège names (fixed-do system)
+const SOLFEGE = { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Ti' };
+
+// Piano key position names for reference
+const PIANO_KEY_NAMES = {
+  C: 'C键', D: 'D键', E: 'E键', F: 'F键',
+  G: 'G键', A: 'A键', B: 'B键'
+};
+
+// Treble clef note positions (line/position → note name + octave)
+// VexFlow: line 3 = middle C (C4), line 5 = first ledger line above = E5
+// For treble clef: line 3 = B4, space above = C5
+// Actually in VexFlow, keys are specified as "c/4", "d/4" etc.
+// We generate random notes within a range
+
+const TREBLE_NOTES = [
+  { key: 'c/4', name: 'C', octave: 4, position: 'low' },   // Middle C (ledger line below)
+  { key: 'd/4', name: 'D', octave: 4, position: 'low' },
+  { key: 'e/4', name: 'E', octave: 4, position: 'low' },    // First line
+  { key: 'f/4', name: 'F', octave: 4, position: 'low' },
+  { key: 'g/4', name: 'G', octave: 4, position: 'mid' },    // Second line
+  { key: 'a/4', name: 'A', octave: 4, position: 'mid' },
+  { key: 'b/4', name: 'B', octave: 4, position: 'mid' },    // Third line (B)
+  { key: 'c/5', name: 'C', octave: 5, position: 'mid' },
+  { key: 'd/5', name: 'D', octave: 5, position: 'mid' },    // Fourth line
+  { key: 'e/5', name: 'E', octave: 5, position: 'high' },
+  { key: 'f/5', name: 'F', octave: 5, position: 'high' },   // Fifth line
+  { key: 'g/5', name: 'G', octave: 5, position: 'high' },
+  { key: 'a/5', name: 'A', octave: 5, position: 'high' },
+  { key: 'b/5', name: 'B', octave: 5, position: 'high' },
+  { key: 'c/6', name: 'C', octave: 6, position: 'high' },
+];
+
+const BASS_NOTES = [
+  { key: 'e/2', name: 'E', octave: 2, position: 'low' },
+  { key: 'f/2', name: 'F', octave: 2, position: 'low' },
+  { key: 'g/2', name: 'G', octave: 2, position: 'low' },    // First line below
+  { key: 'a/2', name: 'A', octave: 2, position: 'low' },
+  { key: 'b/2', name: 'B', octave: 2, position: 'low' },
+  { key: 'c/3', name: 'C', octave: 3, position: 'low' },    // Second line
+  { key: 'd/3', name: 'D', octave: 3, position: 'low' },
+  { key: 'e/3', name: 'E', octave: 3, position: 'mid' },    // Third line
+  { key: 'f/3', name: 'F', octave: 3, position: 'mid' },
+  { key: 'g/3', name: 'G', octave: 3, position: 'mid' },    // Fourth line
+  { key: 'a/3', name: 'A', octave: 3, position: 'mid' },
+  { key: 'b/3', name: 'B', octave: 3, position: 'mid' },    // Fifth line (B)
+  { key: 'c/4', name: 'C', octave: 4, position: 'high' },   // Middle C (ledger line above)
+  { key: 'd/4', name: 'D', octave: 4, position: 'high' },
+  { key: 'e/4', name: 'E', octave: 4, position: 'high' },
+];
+
+// Difficulty levels define which notes are included
+const DIFFICULTY_LEVELS = [
+  {
+    level: 1,
+    name: '初识',
+    desc: '中央C附近',
+    trebleRange: [3, 7],    // E4-B4
+    bassRange: [6, 10],     // E3-B3
+    useSharps: false,
+    useFlats: false,
+    timeLimit: 8000,        // 8 seconds
+    notesCount: 5
+  },
+  {
+    level: 2,
+    name: '入门',
+    desc: '基本音域',
+    trebleRange: [0, 10],   // C4-D5
+    bassRange: [4, 12],     // C3-D4
+    useSharps: false,
+    useFlats: false,
+    timeLimit: 5000,
+    notesCount: 5
+  },
+  {
+    level: 3,
+    name: '进阶',
+    desc: '扩展音域',
+    trebleRange: [0, 12],   // C4-F5
+    bassRange: [2, 14],     // G2-E4
+    useSharps: true,
+    useFlats: true,
+    timeLimit: 3000,
+    notesCount: 5
+  },
+  {
+    level: 4,
+    name: '高级',
+    desc: '全音域',
+    trebleRange: [0, 14],   // All treble
+    bassRange: [0, 14],     // All bass
+    useSharps: true,
+    useFlats: true,
+    timeLimit: 2000,
+    notesCount: 5
+  },
+  {
+    level: 5,
+    name: '大师',
+    desc: '快速双谱切换',
+    trebleRange: [0, 14],
+    bassRange: [0, 14],
+    useSharps: true,
+    useFlats: true,
+    timeLimit: 1500,
+    notesCount: 5
+  }
+];
+
+// Piano key frequencies (for audio playback)
+const PIANO_NOTES = {};
+(() => {
+  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  for (let octave = 0; octave <= 8; octave++) {
+    for (let i = 0; i < 12; i++) {
+      const name = noteNames[i] + octave;
+      const midi = octave * 12 + i + 12;
+      const freq = 440 * Math.pow(2, (midi - 69) / 12);
+      PIANO_NOTES[name] = { freq, midi, name: noteNames[i], octave };
+    }
+  }
+})();
+
+// Get frequency for a VexFlow key like "c/4"
+function getFrequencyForKey(vexKey) {
+  const [note, octave] = vexKey.split('/');
+  const lookup = note.toUpperCase() + (note.includes('#') ? '' : '') + octave;
+  const entry = PIANO_NOTES[lookup];
+  return entry ? entry.freq : 440;
+}
+
+// Utility: random item from array
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Utility: random integer in range [min, max]
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Generate a random note for practice
+function generateRandomNote(difficulty, clef) {
+  const level = DIFFICULTY_LEVELS[difficulty - 1];
+  const isTreble = clef === 'treble' || (clef === 'random' && Math.random() > 0.5);
+  const notes = isTreble ? TREBLE_NOTES : BASS_NOTES;
+  const range = isTreble ? level.trebleRange : level.bassRange;
+
+  let note = notes[randomInt(range[0], range[1])];
+
+  // Optionally add sharp or flat
+  let displayKey = note.key;
+  let displayName = note.name;
+  let accidental = null;
+
+  if (level.useSharps && Math.random() > 0.7) {
+    accidental = '#';
+    displayName = note.name + '#';
+    // For VexFlow, sharps use the key notation
+    displayKey = note.key; // VexFlow handles accidentals via modifier
+  } else if (level.useFlats && Math.random() > 0.7) {
+    accidental = 'b';
+    displayName = note.name + 'b';
+    displayKey = note.key;
+  }
+
+  return {
+    key: displayKey,
+    name: note.name, // Base note name for answer (C, D, E, etc.)
+    displayName: displayName,
+    octave: note.octave,
+    clef: isTreble ? 'treble' : 'bass',
+    accidental: accidental,
+    position: note.position
+  };
+}
+</script><script>
+// ========== Audio Module — Multiple Sound Presets ==========
+
+class AudioManager {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+    this.preset = 'warm'; // default preset
+    this.presets = {
+      warm:   { name: '温暖钢琴', icon: '🎹' },
+      bright: { name: '明亮钢琴', icon: '✨' },
+      electric: { name: '电钢琴', icon: '⚡' },
+      organ:  { name: '管风琴', icon: '🎵' },
+    };
+  }
+
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  resume() {
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  setPreset(name) {
+    if (this.presets[name]) this.preset = name;
+  }
+
+  // Main playNote — dispatches to preset
+  playNote(freq, duration) {
+    if (!this.enabled) return;
+    duration = duration || 2.0;
+    this.init();
+    this.resume();
+
+    switch (this.preset) {
+      case 'warm':     this._playWarm(freq, duration); break;
+      case 'bright':   this._playBright(freq, duration); break;
+      case 'electric': this._playElectric(freq, duration); break;
+      case 'organ':    this._playOrgan(freq, duration); break;
+      default:         this._playWarm(freq, duration);
+    }
+  }
+
+  // === Warm Piano — soft, round, natural ===
+  _playWarm(freq, dur) {
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+
+    var master = ctx.createGain();
+    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.35, now + 0.008);
+    master.gain.linearRampToValueAtTime(0.25, now + 0.05);
+    master.gain.exponentialRampToValueAtTime(0.12, now + 0.8);
+    master.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    // Warm harmonics — strong fundamentals, gentle upper
+    var h = [
+      { r:1, a:1.0,  d:1.0 },
+      { r:2, a:0.55, d:0.85 },
+      { r:3, a:0.3,  d:0.7 },
+      { r:4, a:0.12, d:0.55 },
+      { r:5, a:0.06, d:0.4 },
+      { r:6, a:0.03, d:0.3 },
+    ];
+    h.forEach(function(p) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * p.r;
+      g.gain.setValueAtTime(p.a, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + dur * p.d);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(now);
+      osc.stop(now + dur * p.d + 0.1);
+    });
+
+    // Soft hammer
+    this._addNoise(ctx, master, now, 0.006, 0.08, 1500);
+  }
+
+  // === Bright Piano — clear, present, sparkling ===
+  _playBright(freq, dur) {
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+
+    var master = ctx.createGain();
+    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.32, now + 0.005);
+    master.gain.linearRampToValueAtTime(0.22, now + 0.03);
+    master.gain.exponentialRampToValueAtTime(0.1, now + 0.6);
+    master.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    var h = [
+      { r:1, a:1.0,  d:1.0 },
+      { r:2, a:0.6,  d:0.9 },
+      { r:3, a:0.4,  d:0.75 },
+      { r:4, a:0.2,  d:0.6 },
+      { r:5, a:0.18, d:0.5 },
+      { r:6, a:0.1,  d:0.4 },
+      { r:7, a:0.08, d:0.3 },
+      { r:8, a:0.05, d:0.25 },
+    ];
+    h.forEach(function(p) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * p.r * (1 + 0.0002 * p.r);
+      g.gain.setValueAtTime(p.a, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + dur * p.d);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(now);
+      osc.stop(now + dur * p.d + 0.1);
+    });
+
+    // Bright attack ping
+    var ping = ctx.createOscillator();
+    var pg = ctx.createGain();
+    ping.type = 'sine';
+    ping.frequency.value = freq * 4;
+    pg.gain.setValueAtTime(0.1, now);
+    pg.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+    ping.connect(pg);
+    pg.connect(master);
+    ping.start(now);
+    ping.stop(now + 0.03);
+
+    this._addNoise(ctx, master, now, 0.005, 0.12, 2500);
+  }
+
+  // === Electric Piano — Rhodes-like, warm + bell ===
+  _playElectric(freq, dur) {
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+
+    var master = ctx.createGain();
+    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.3, now + 0.005);
+    master.gain.exponentialRampToValueAtTime(0.15, now + 0.5);
+    master.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    // Sinusoidal with bell-like upper partials
+    var h = [
+      { r:1, a:1.0, d:1.0 },
+      { r:2, a:0.3, d:0.8 },
+      { r:3, a:0.5, d:0.6 },  // Strong 3rd for Rhodes character
+      { r:4, a:0.1, d:0.5 },
+      { r:6, a:0.2, d:0.3 },  // Bell partial
+    ];
+    h.forEach(function(p) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * p.r;
+      g.gain.setValueAtTime(p.a, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + dur * p.d);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(now);
+      osc.stop(now + dur * p.d + 0.1);
+    });
+
+    // Tine click
+    var tine = ctx.createOscillator();
+    var tg = ctx.createGain();
+    tine.type = 'triangle';
+    tine.frequency.value = freq * 8;
+    tg.gain.setValueAtTime(0.08, now);
+    tg.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+    tine.connect(tg);
+    tg.connect(master);
+    tine.start(now);
+    tine.stop(now + 0.02);
+  }
+
+  // === Organ — sustained, warm, church-like ===
+  _playOrgan(freq, dur) {
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+
+    var master = ctx.createGain();
+    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.2, now + 0.05);
+    master.gain.setValueAtTime(0.2, now + 0.05);
+    master.gain.setValueAtTime(0.2, now + dur - 0.1);
+    master.gain.linearRampToValueAtTime(0, now + dur);
+
+    // Organ drawbars
+    var h = [
+      { r:0.5, a:0.4 },  // Sub
+      { r:1,   a:1.0 },  // Fundamental
+      { r:2,   a:0.6 },  // Octave
+      { r:3,   a:0.3 },  // Twelfth
+      { r:4,   a:0.4 },  // Double
+      { r:5,   a:0.15 },
+      { r:6,   a:0.2 },
+      { r:8,   a:0.1 },
+    ];
+    h.forEach(function(p) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * p.r;
+      g.gain.setValueAtTime(p.a, now);
+      g.gain.setValueAtTime(p.a, now + dur - 0.1);
+      g.gain.linearRampToValueAtTime(0, now + dur);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(now);
+      osc.stop(now + dur + 0.1);
+    });
+  }
+
+  // Helper: add filtered noise transient
+  _addNoise(ctx, dest, now, attack, vol, hpFreq) {
+    var len = 0.03;
+    var buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * attack));
+    }
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    var g = ctx.createGain();
+    var hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = hpFreq;
+    g.gain.setValueAtTime(vol, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + len);
+    src.connect(hp);
+    hp.connect(g);
+    g.connect(dest);
+    src.start(now);
+  }
+
+  // === Feedback Sounds ===
+  playCorrect() {
+    if (!this.enabled) return;
+    this.init();
+    this.resume();
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+    [523.25, 659.25, 783.99].forEach(function(f, i) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      var t = now + i * 0.06;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.12, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  }
+
+  playWrong() {
+    if (!this.enabled) return;
+    this.init();
+    this.resume();
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+    [190, 200].forEach(function(f) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.06, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    });
+  }
+
+  playCombo(count) {
+    if (!this.enabled) return;
+    this.init();
+    this.resume();
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+    var base = 700 + count * 10;
+    for (var i = 0; i < 4; i++) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = base + i * 130;
+      var t = now + i * 0.04;
+      g.gain.setValueAtTime(0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    }
+  }
+
+  playFanfare() {
+    if (!this.enabled) return;
+    this.init();
+    this.resume();
+    var ctx = this.ctx;
+    var now = ctx.currentTime;
+    [523.25, 587.33, 659.25, 783.99, 880, 1046.5].forEach(function(f, i) {
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      var t = now + i * 0.08;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.1, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.45);
+    });
+  }
+}
+
+var audio = new AudioManager();
+</script><script>
+// ========== Statistics Module ==========
+
+class StatsManager {
+  constructor() {
+    this.STORAGE_KEY = 'sight_reading_stats';
+    this.data = this.load();
+  }
+
+  load() {
+    try {
+      const saved = localStorage.getItem(this.STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return this.getDefaultData();
+  }
+
+  getDefaultData() {
+    return {
+      totalSessions: 0,
+      totalNotes: 0,
+      totalCorrect: 0,
+      totalTime: 0, // ms
+      exp: 0,
+      level: 1,
+      streak: 0,        // Current daily streak
+      bestStreak: 0,
+      lastPracticeDate: null,
+      // Per-note stats: { "C": { correct: 0, total: 0, avgTime: 0, times: [] }, ... }
+      noteStats: {},
+      // Per-clef stats
+      clefStats: {
+        treble: { correct: 0, total: 0 },
+        bass: { correct: 0, total: 0 }
+      },
+      // Per-difficulty stats
+      diffStats: {
+        1: { sessions: 0, avgScore: 0 },
+        2: { sessions: 0, avgScore: 0 },
+        3: { sessions: 0, avgScore: 0 },
+        4: { sessions: 0, avgScore: 0 },
+        5: { sessions: 0, avgScore: 0 }
+      },
+      // Session history (last 100)
+      history: [],
+      // Daily records for calendar heatmap: { "2026-05-16": { count: 50, correct: 45 } }
+      dailyRecords: {},
+      // Achievements
+      achievements: []
+    };
+  }
+
+  save() {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+    } catch (e) {}
+  }
+
+  // Record a single answer
+  recordAnswer(noteName, clef, correct, responseTime) {
+    // Note stats
+    if (!this.data.noteStats[noteName]) {
+      this.data.noteStats[noteName] = { correct: 0, total: 0, totalTime: 0, times: [] };
+    }
+    const ns = this.data.noteStats[noteName];
+    ns.total++;
+    if (correct) ns.correct++;
+    ns.totalTime += responseTime;
+    ns.times.push(responseTime);
+    if (ns.times.length > 100) ns.times.shift(); // Keep last 100
+
+    // Clef stats
+    this.data.clefStats[clef].total++;
+    if (correct) this.data.clefStats[clef].correct++;
+
+    // Global stats
+    this.data.totalNotes++;
+    if (correct) this.data.totalCorrect++;
+    this.data.totalTime += responseTime;
+
+    // EXP
+    if (correct) {
+      this.data.exp += 10;
+      if (responseTime < 1000) this.data.exp += 5; // Speed bonus
+    }
+
+    // Level up check
+    const newLevel = Math.floor(this.data.exp / 500) + 1;
+    if (newLevel > this.data.level) {
+      this.data.level = newLevel;
+    }
+
+    this.save();
+    return this.data.level;
+  }
+
+  // Record a completed session
+  recordSession(sessionData) {
+    const today = new Date().toISOString().split('T')[0];
+
+    this.data.totalSessions++;
+
+    // Update difficulty stats
+    const diff = sessionData.difficulty;
+    const ds = this.data.diffStats[diff];
+    ds.sessions++;
+    ds.avgScore = ((ds.avgScore * (ds.sessions - 1)) + sessionData.accuracy) / ds.sessions;
+
+    // Update daily record
+    if (!this.data.dailyRecords[today]) {
+      this.data.dailyRecords[today] = { count: 0, correct: 0, time: 0 };
+    }
+    const daily = this.data.dailyRecords[today];
+    daily.count += sessionData.total;
+    daily.correct += sessionData.correct;
+    daily.time += sessionData.duration;
+
+    // Update streak
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    if (this.data.lastPracticeDate === yesterday || this.data.lastPracticeDate === today) {
+      if (this.data.lastPracticeDate !== today) {
+        this.data.streak++;
+      }
+    } else {
+      this.data.streak = 1;
+    }
+    this.data.lastPracticeDate = today;
+    if (this.data.streak > this.data.bestStreak) {
+      this.data.bestStreak = this.data.streak;
+    }
+
+    // Add to history
+    this.data.history.unshift({
+      date: new Date().toISOString(),
+      difficulty: sessionData.difficulty,
+      mode: sessionData.mode,
+      clef: sessionData.clef,
+      total: sessionData.total,
+      correct: sessionData.correct,
+      accuracy: sessionData.accuracy,
+      avgTime: sessionData.avgTime,
+      duration: sessionData.duration,
+      combo: sessionData.maxCombo
+    });
+    if (this.data.history.length > 100) this.data.history.pop();
+
+    // Check achievements
+    this.checkAchievements();
+
+    this.save();
+  }
+
+  checkAchievements() {
+    const checks = [
+      { id: 'first_session', name: '初次尝试', check: () => this.data.totalSessions >= 1 },
+      { id: 'note_100', name: '百音识谱', check: () => this.data.totalNotes >= 100 },
+      { id: 'note_1000', name: '千音达人', check: () => this.data.totalNotes >= 1000 },
+      { id: 'streak_3', name: '三天打卡', check: () => this.data.streak >= 3 },
+      { id: 'streak_7', name: '一周坚持', check: () => this.data.streak >= 7 },
+      { id: 'streak_30', name: '月度达人', check: () => this.data.streak >= 30 },
+      { id: 'acc_90', name: '准确无误', check: () => {
+        const recent = this.data.history.slice(0, 10);
+        return recent.length >= 10 && recent.every(s => s.accuracy >= 90);
+      }},
+      { id: 'level_5', name: '五级新手', check: () => this.data.level >= 5 },
+      { id: 'level_10', name: '识谱高手', check: () => this.data.level >= 10 },
+      { id: 'bass_master', name: '低音达人', check: () => {
+        const bs = this.data.clefStats.bass;
+        return bs.total >= 200 && (bs.correct / bs.total) >= 0.9;
+      }},
+      { id: 'treble_master', name: '高音达人', check: () => {
+        const ts = this.data.clefStats.treble;
+        return ts.total >= 200 && (ts.correct / ts.total) >= 0.9;
+      }},
+      { id: 'speed_demon', name: '闪电之眼', check: () => {
+        return this.data.history.some(s => s.avgTime < 1500 && s.accuracy >= 80);
+      }}
+    ];
+
+    checks.forEach(({ id, name, check }) => {
+      if (!this.data.achievements.includes(id) && check()) {
+        this.data.achievements.push(id);
+        showToast(`🏆 成就解锁: ${name}`, 'success');
+      }
+    });
+  }
+
+  // Get weak notes (sorted by error rate descending)
+  getWeakNotes(limit = 7) {
+    const results = [];
+    for (const [name, stats] of Object.entries(this.data.noteStats)) {
+      if (stats.total < 3) continue; // Need minimum data
+      const errorRate = 1 - (stats.correct / stats.total);
+      const avgTime = stats.totalTime / stats.total;
+      results.push({ name, errorRate, avgTime, total: stats.total, correct: stats.correct });
+    }
+    results.sort((a, b) => b.errorRate - a.errorRate);
+    return results.slice(0, limit);
+  }
+
+  // Get note accuracy for heatmap
+  getNoteAccuracy() {
+    const result = {};
+    for (const name of NOTES) {
+      const stats = this.data.noteStats[name];
+      if (stats && stats.total > 0) {
+        result[name] = {
+          accuracy: Math.round((stats.correct / stats.total) * 100),
+          avgTime: Math.round(stats.totalTime / stats.total),
+          total: stats.total
+        };
+      } else {
+        result[name] = { accuracy: -1, avgTime: 0, total: 0 }; // No data
+      }
+    }
+    return result;
+  }
+
+  // Get clef comparison
+  getClefComparison() {
+    const treble = this.data.clefStats.treble;
+    const bass = this.data.clefStats.bass;
+    return {
+      treble: treble.total > 0 ? Math.round((treble.correct / treble.total) * 100) : 0,
+      bass: bass.total > 0 ? Math.round((bass.correct / bass.total) * 100) : 0,
+      trebleTotal: treble.total,
+      bassTotal: bass.total
+    };
+  }
+
+  // Get daily records for calendar (last 90 days)
+  getCalendarData() {
+    const data = {};
+    for (let i = 0; i < 90; i++) {
+      const d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+      data[d] = this.data.dailyRecords[d] || null;
+    }
+    return data;
+  }
+
+  // Get response time trend (from history)
+  getTimeTrend(days = 14) {
+    const trend = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+      const sessions = this.data.history.filter(s => s.date.startsWith(d));
+      if (sessions.length > 0) {
+        const avgTime = sessions.reduce((sum, s) => sum + s.avgTime, 0) / sessions.length;
+        const avgAcc = sessions.reduce((sum, s) => sum + s.accuracy, 0) / sessions.length;
+        trend.push({ date: d, avgTime: Math.round(avgTime), accuracy: Math.round(avgAcc), sessions: sessions.length });
+      } else {
+        trend.push({ date: d, avgTime: null, accuracy: null, sessions: 0 });
+      }
+    }
+    return trend;
+  }
+
+  // Get EXP level info
+  getLevelInfo() {
+    const exp = this.data.exp;
+    const level = this.data.level;
+    const expForCurrent = (level - 1) * 500;
+    const expForNext = level * 500;
+    const progress = (exp - expForCurrent) / (expForNext - expForCurrent);
+    const titles = ['新手', '见习', '学徒', '熟练', '精通', '专家', '大师', '宗师', '传说'];
+    const title = titles[Math.min(level - 1, titles.length - 1)];
+    return { level, exp, progress, title, expForNext };
+  }
+
+  // Reset all data
+  reset() {
+    this.data = this.getDefaultData();
+    this.save();
+  }
+}
+
+const stats = new StatsManager();
+</script><script>
+// ========== Practice Plan Generator ==========
+
+class PlanGenerator {
+  constructor(statsManager) {
+    this.stats = statsManager;
+  }
+
+  // Generate a daily practice plan based on performance data
+  generateDailyPlan() {
+    const plan = [];
+    const data = this.stats.data;
+    const levelInfo = this.stats.getLevelInfo();
+    const weakNotes = this.stats.getWeakNotes(5);
+    const clefComp = this.stats.getClefComparison();
+
+    // 1. Warm-up (always first)
+    plan.push({
+      id: 'warmup',
+      icon: '🔥',
+      title: '热身',
+      desc: '轻松回顾已掌握的音符',
+      duration: 3,
+      type: 'practice',
+      config: {
+        difficulty: Math.max(1, Math.min(levelInfo.level, 3)),
+        mode: 'flash',
+        clef: 'random',
+        noteCount: 15,
+        isWarmup: true
+      }
+    });
+
+    // 2. Weak note training (if any weak notes)
+    if (weakNotes.length > 0 && weakNotes[0].errorRate > 0.2) {
+      const targetNotes = weakNotes.filter(n => n.errorRate > 0.2).slice(0, 3);
+      plan.push({
+        id: 'weak_notes',
+        icon: '🎯',
+        title: '弱项强化',
+        desc: `重点练习: ${targetNotes.map(n => n.name).join(', ')} (错误率最高)`,
+        duration: 5,
+        type: 'practice',
+        config: {
+          difficulty: Math.max(1, Math.min(levelInfo.level, 3)),
+          mode: 'flash',
+          clef: 'random',
+          noteCount: 25,
+          targetNotes: targetNotes.map(n => n.name),
+          isWarmup: false
+        }
+      });
+    }
+
+    // 3. Clef balance (if one clef is significantly weaker)
+    if (clefComp.trebleTotal > 10 && clefComp.bassTotal > 10) {
+      const diff = Math.abs(clefComp.treble - clefComp.bass);
+      if (diff > 15) {
+        const weakerClef = clefComp.treble < clefComp.bass ? 'bass' : 'treble';
+        const clefName = weakerClef === 'treble' ? '高音谱' : '低音谱';
+        plan.push({
+          id: 'clef_balance',
+          icon: '⚖️',
+          title: `${clefName}强化`,
+          desc: `${clefName}正确率偏低，专项提升`,
+          duration: 4,
+          type: 'practice',
+          config: {
+            difficulty: Math.max(1, Math.min(levelInfo.level, 3)),
+            mode: 'flash',
+            clef: weakerClef,
+            noteCount: 20,
+            isWarmup: false
+          }
+        });
+      }
+    }
+
+    // 4. Speed challenge (if accuracy is good but speed is slow)
+    const recentHistory = data.history.slice(0, 10);
+    if (recentHistory.length >= 3) {
+      const avgAcc = recentHistory.reduce((s, h) => s + h.accuracy, 0) / recentHistory.length;
+      const avgTime = recentHistory.reduce((s, h) => s + h.avgTime, 0) / recentHistory.length;
+      if (avgAcc >= 85 && avgTime > 2500) {
+        plan.push({
+          id: 'speed',
+          icon: '⚡',
+          title: '速度冲刺',
+          desc: '正确率达标，提升反应速度',
+          duration: 4,
+          type: 'practice',
+          config: {
+            difficulty: Math.max(1, Math.min(levelInfo.level, 3)),
+            mode: 'sprint',
+            clef: 'random',
+            sprintDuration: 60,
+            isWarmup: false
+          }
+        });
+      }
+    }
+
+    // 5. Dual clef practice (if at level 2+)
+    if (levelInfo.level >= 2) {
+      plan.push({
+        id: 'dual_clef',
+        icon: '🔄',
+        title: '双谱切换',
+        desc: '高低音谱随机交替，训练快速切换',
+        duration: 3,
+        type: 'practice',
+        config: {
+          difficulty: Math.max(1, Math.min(levelInfo.level, 3)),
+          mode: 'clef_switch',
+          clef: 'random',
+          noteCount: 20,
+          isWarmup: false
+        }
+      });
+    }
+
+    // 6. Daily challenge
+    plan.push({
+      id: 'daily_challenge',
+      icon: '🏆',
+      title: '每日挑战',
+      desc: '完成今日挑战获取额外经验值',
+      duration: 2,
+      type: 'practice',
+      config: {
+        difficulty: Math.min(levelInfo.level + 1, 5),
+        mode: 'sprint',
+        clef: 'random',
+        sprintDuration: 30,
+        isDailyChallenge: true,
+        isWarmup: false
+      }
+    });
+
+    return plan;
+  }
+
+  // Get difficulty recommendation
+  getRecommendedDifficulty() {
+    const data = this.stats.data;
+    const recentHistory = data.history.slice(0, 10);
+
+    if (recentHistory.length < 3) return 1;
+
+    const avgAcc = recentHistory.reduce((s, h) => s + h.accuracy, 0) / recentHistory.length;
+    const maxRecentDiff = Math.max(...recentHistory.map(h => h.difficulty));
+
+    if (avgAcc >= 90 && maxRecentDiff < 5) return maxRecentDiff + 1;
+    if (avgAcc < 60 && maxRecentDiff > 1) return maxRecentDiff - 1;
+    return maxRecentDiff;
+  }
+
+  // Get motivational message based on stats
+  getMotivationMessage() {
+    const data = this.stats.data;
+    const streak = data.streak;
+    const levelInfo = this.stats.getLevelInfo();
+
+    if (streak >= 30) return '太厉害了！连续练习超过一个月！';
+    if (streak >= 7) return '一周坚持打卡，保持这个节奏！';
+    if (streak >= 3) return '连续三天，正在养成好习惯！';
+    if (data.totalSessions === 0) return '开始你的识谱之旅吧！';
+    if (levelInfo.progress > 0.8) return '快要升级了，加油！';
+    return '每天练习，稳步进步！';
+  }
+
+  // Get achievement list with status
+  getAchievements() {
+    const all = [
+      { id: 'first_session', name: '初次尝试', desc: '完成第一次练习', icon: '🎵' },
+      { id: 'note_100', name: '百音识谱', desc: '累计识别100个音符', icon: '💯' },
+      { id: 'note_1000', name: '千音达人', desc: '累计识别1000个音符', icon: '🔥' },
+      { id: 'streak_3', name: '三天打卡', desc: '连续三天练习', icon: '📅' },
+      { id: 'streak_7', name: '一周坚持', desc: '连续七天练习', icon: '🗓️' },
+      { id: 'streak_30', name: '月度达人', desc: '连续三十天练习', icon: '👑' },
+      { id: 'acc_90', name: '准确无误', desc: '连续10次练习正确率≥90%', icon: '🎯' },
+      { id: 'level_5', name: '五级新手', desc: '达到5级', icon: '⭐' },
+      { id: 'level_10', name: '识谱高手', desc: '达到10级', icon: '🌟' },
+      { id: 'bass_master', name: '低音达人', desc: '低音谱正确率≥90%且练习≥200', icon: '🎼' },
+      { id: 'treble_master', name: '高音达人', desc: '高音谱正确率≥90%且练习≥200', icon: '🎶' },
+      { id: 'speed_demon', name: '闪电之眼', desc: '单次练习平均反应<1.5s且正确率≥80%', icon: '⚡' }
+    ];
+
+    return all.map(a => ({
+      ...a,
+      unlocked: this.stats.data.achievements.includes(a.id)
+    }));
+  }
+}
+
+const planGenerator = new PlanGenerator(stats);
+</script><script>
+// ========== Score Renderer (Pure SVG, no dependencies) ==========
+
+class ScoreRenderer {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.currentNote = null;
+    this.width = 420;
+    this.height = 180;
+  }
+
+  init(width, height) {
+    this.width = width || 420;
+    this.height = height || 180;
+    this.container.innerHTML = '';
+  }
+
+  // Note name+octave → staff position
+  // Both clefs use same y range: top line y=60(pos=10), bottom line y=108(pos=2)
+  // Treble: F5=10(top), E4=2(bottom), C4=0(middle C below)
+  // Bass:   A3=10(top), G2=2(bottom)
+  noteToPosition(note) {
+    var noteOrder = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
+    var base = noteOrder[note.name] || 0;
+    var octaveOffset = (note.octave - 4) * 7;
+    var pos = base + octaveOffset;
+    if (note.clef === 'bass') pos += 12; // G2=2(1st line), A3=10(top line)
+    return pos;
+  }
+
+  // Position → y coordinate on staff
+  positionToY(pos) {
+    // Staff lines for treble: E4(2), G4(4), B4(6), D5(8), F5(10) → y positions
+    // Middle C (pos=0) is below the staff on treble
+    // Each step = 6px (half a line spacing)
+    var staffTop = 60;      // y of the top line (line 5)
+    var lineSpacing = 12;   // pixels between lines
+    var topLinePos = 10;    // F5 is at position 10 (top line of treble staff)
+    var y = staffTop + (topLinePos - pos) * (lineSpacing / 2);
+    return y;
+  }
+
+  renderEmptyStaff(clef) {
+    var w = this.width;
+    var h = this.height;
+    var clefSymbol = clef === 'treble' ? '𝄞' : '𝄢';
+
+    var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<rect width="' + w + '" height="' + h + '" fill="transparent"/>';
+
+    var staffLeft = 60;
+    var staffRight = w - 30;
+    var staffTop = 60;
+    var lineSpacing = 12;
+    for (var i = 0; i < 5; i++) {
+      var ly = staffTop + i * lineSpacing;
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+    }
+
+    var clefY = clef === 'treble' ? (staffTop + 42) : (staffTop + 36);
+    svg += '<text x="' + (staffLeft + 5) + '" y="' + clefY + '" font-size="48" fill="#aaa" font-family="serif">' + clefSymbol + '</text>';
+
+    // Question mark in the center
+    svg += '<text x="' + (w / 2 + 20) + '" y="' + (staffTop + 40) + '" text-anchor="middle" font-size="32" fill="#555570" font-weight="bold">?</text>';
+
+    svg += '<text x="' + (staffRight - 4) + '" y="' + (h - 10) + '" text-anchor="end" font-size="11" fill="#666680">' + (clef === 'treble' ? '高音谱' : '低音谱') + '</text>';
+    svg += '</svg>';
+
+    this.container.innerHTML = svg;
+  }
+
+  renderNote(note) {
+    this.currentNote = note;
+    var w = this.width;
+    var h = this.height;
+    var pos = this.noteToPosition(note);
+    var noteY = this.positionToY(pos);
+    var clefSymbol = note.clef === 'treble' ? '𝄞' : '𝄢';
+    var acc = note.accidental || '';
+    var noteColor = '#e8e8f0'; // Neutral color, no hint
+
+    // Build SVG
+    var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<rect width="' + w + '" height="' + h + '" fill="transparent"/>';
+
+    // Staff lines (5 lines)
+    var staffLeft = 60;
+    var staffRight = w - 30;
+    var staffTop = 60;
+    var lineSpacing = 12;
+    for (var i = 0; i < 5; i++) {
+      var ly = staffTop + i * lineSpacing;
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+    }
+
+    // Clef symbol — position differs for treble vs bass
+    var clefY = note.clef === 'treble' ? (staffTop + 42) : (staffTop + 36);
+    svg += '<text x="' + (staffLeft + 5) + '" y="' + clefY + '" font-size="48" fill="#aaa" font-family="serif">' + clefSymbol + '</text>';
+
+    // Ledger lines if needed
+    var staffBottom = staffTop + 4 * lineSpacing;
+    var noteX = w / 2 + 20;
+
+    if (noteY > staffBottom) {
+      for (var ly = staffBottom + lineSpacing; ly <= noteY + 2; ly += lineSpacing) {
+        svg += '<line x1="' + (noteX - 16) + '" y1="' + ly + '" x2="' + (noteX + 16) + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+      }
+    }
+    if (noteY < staffTop) {
+      for (var ly = staffTop - lineSpacing; ly >= noteY - 2; ly -= lineSpacing) {
+        svg += '<line x1="' + (noteX - 16) + '" y1="' + ly + '" x2="' + (noteX + 16) + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+      }
+    }
+
+    // Note head (neutral white fill)
+    svg += '<ellipse cx="' + noteX + '" cy="' + noteY + '" rx="9" ry="7" fill="' + noteColor + '" stroke="' + noteColor + '" stroke-width="1.5" transform="rotate(-15,' + noteX + ',' + noteY + ')"/>';
+
+    // Stem
+    var stemUp = noteY > (staffTop + 2 * lineSpacing);
+    if (stemUp) {
+      svg += '<line x1="' + (noteX + 8) + '" y1="' + noteY + '" x2="' + (noteX + 8) + '" y2="' + (noteY - 40) + '" stroke="' + noteColor + '" stroke-width="1.5"/>';
+    } else {
+      svg += '<line x1="' + (noteX - 8) + '" y1="' + noteY + '" x2="' + (noteX - 8) + '" y2="' + (noteY + 40) + '" stroke="' + noteColor + '" stroke-width="1.5"/>';
+    }
+
+    // Accidental symbol (no note name)
+    if (acc) {
+      var accSymbol = acc === '#' ? '♯' : '♭';
+      svg += '<text x="' + (noteX - 26) + '" y="' + (noteY + 6) + '" font-size="18" fill="' + noteColor + '" font-weight="bold">' + accSymbol + '</text>';
+    }
+
+    // Clef label only
+    svg += '<text x="' + (staffRight - 4) + '" y="' + (h - 10) + '" text-anchor="end" font-size="11" fill="#666680">' + (note.clef === 'treble' ? '高音谱' : '低音谱') + '</text>';
+
+    svg += '</svg>';
+    this.container.innerHTML = svg;
+  }
+
+  clear() {
+    if (this.container) this.container.innerHTML = '';
+  }
+}
+</script><script>
+// ========== Main Application ==========
+
+class App {
+  constructor() {
+    this.currentPage = 'home';
+    this.practiceState = null;
+    this.renderer = null;
+    this.settings = { sound: true, timeLimit: true, showSolfege: false, showPiano: false };
+    this.selectedMode = 'flash';
+    this.selectedDifficulty = 1;
+    this.selectedClef = 'treble';
+    this._planConfigs = [];
+    this._bound = false;
+
+    // Load saved settings
+    try {
+      const s = localStorage.getItem('sr_settings');
+      if (s) Object.assign(this.settings, JSON.parse(s));
+    } catch(e) {}
+  }
+
+  saveSettings() {
+    try { localStorage.setItem('sr_settings', JSON.stringify(this.settings)); } catch(e) {}
+  }
+
+  init() {
+    this.bindEvents();
+    this.showPage('home');
+    audio.enabled = this.settings.sound;
+  }
+
+  // ===== Event Binding (delegation) =====
+  bindEvents() {
+    if (this._bound) return;
+    this._bound = true;
+    var self = this;
+
+    // Sidebar navigation
+    document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+      el.addEventListener('click', function() { self.showPage(el.dataset.page); });
+    });
+
+    // Mobile menu
+    var menuBtn = document.getElementById('mobileMenuBtn');
+    if (menuBtn) menuBtn.addEventListener('click', function() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    });
+
+    // Click handling uses inline onclick on buttons
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (this.currentPage !== 'practice' || !this.practiceState || this.practiceState.answered) return;
+      var keyMap = { '1':'C','2':'D','3':'E','4':'F','5':'G','6':'A','7':'B',
+                     'c':'C','d':'D','e':'E','f':'F','g':'G','a':'A','b':'B' };
+      var note = keyMap[e.key.toLowerCase()];
+      if (note) { e.preventDefault(); this.submitAnswer(note); }
+    });
+  }
+
+  showPage(page) {
+    this.currentPage = page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    var pageEl = document.getElementById('page-' + page);
+    var navEl = document.querySelector('.nav-item[data-page="' + page + '"]');
+    if (pageEl) pageEl.classList.add('active');
+    if (navEl) navEl.classList.add('active');
+
+    try {
+      switch(page) {
+        case 'home': this.renderHome(); break;
+        case 'practice': this.renderPracticeSetup(); break;
+        case 'stats': this.renderStats(); break;
+        case 'plan': this.renderPlan(); break;
+        case 'achievements': this.renderAchievements(); break;
+      }
+    } catch(e) {
+      console.error('Render error:', page, e);
+      var el = document.getElementById(page + 'Content') || document.getElementById('practiceSetup');
+      if (el) el.innerHTML = '<div class="card" style="color:#f87171;padding:30px">渲染出错: ' + e.message + '</div>';
+    }
+  }
+
+  // ===== HOME PAGE =====
+  renderHome() {
+    var levelInfo = stats.getLevelInfo();
+    var motivation = planGenerator.getMotivationMessage();
+    var quickPlan = planGenerator.generateDailyPlan();
+    var totalMin = Math.round(stats.data.totalTime / 60000);
+    var overallAcc = stats.data.totalNotes > 0
+      ? Math.round((stats.data.totalCorrect / stats.data.totalNotes) * 100) : 0;
+
+    this._planConfigs = quickPlan.map(p => p.config);
+
+    document.getElementById('homeContent').innerHTML =
+      '<div class="fade-in">' +
+        '<div class="card" style="background:linear-gradient(135deg,rgba(108,99,255,0.12),rgba(34,211,238,0.08),rgba(244,114,182,0.06));border-color:rgba(108,99,255,0.15);position:relative;overflow:hidden">' +
+          '<div style="position:absolute;top:-30px;right:-30px;font-size:8rem;opacity:0.04;pointer-events:none">🎼</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative">' +
+            '<div>' +
+              '<div style="font-size:1.2rem;font-weight:700;margin-bottom:2px">' + motivation + '</div>' +
+              '<div style="color:var(--text2);font-size:0.82rem">' +
+                '连续打卡 <strong style="color:var(--warning)">' + stats.data.streak + '</strong> 天' +
+                ' &nbsp;·&nbsp; ' +
+                '<strong style="color:var(--primary2)">Lv.' + levelInfo.level + '</strong> ' + levelInfo.title +
+              '</div>' +
+            '</div>' +
+            '<button class="btn btn-primary btn-lg" onclick="app.startQuickPractice()" style="padding:14px 36px;font-size:0.95rem">开始练习</button>' +
+          '</div>' +
+          '<div style="margin-top:14px;position:relative">' +
+            '<div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text3);margin-bottom:5px">' +
+              '<span>Lv.' + levelInfo.level + ' ' + levelInfo.title + '</span>' +
+              '<span>' + levelInfo.exp + ' / ' + levelInfo.expForNext + ' EXP</span>' +
+            '</div>' +
+            '<div class="level-bar"><div class="level-bar-fill" style="width:' + (levelInfo.progress*100) + '%"></div></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="grid grid-4" style="margin-bottom:20px">' +
+          '<div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-number">' + overallAcc + '%</div><div class="stat-label">正确率</div></div>' +
+          '<div class="stat-card"><div class="stat-icon">📝</div><div class="stat-number">' + stats.data.totalNotes + '</div><div class="stat-label">累计识谱</div></div>' +
+          '<div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-number">' + totalMin + '</div><div class="stat-label">分钟</div></div>' +
+          '<div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-number">' + stats.data.achievements.length + '</div><div class="stat-label">成就</div></div>' +
+        '</div>' +
+
+        '<div class="card">' +
+          '<div class="card-header"><span class="card-title">📋 今日计划</span><span class="badge badge-primary">' + quickPlan.length + ' 项</span></div>' +
+          quickPlan.map(function(item, i) {
+            return '<div class="plan-item">' +
+              '<span class="plan-icon">' + item.icon + '</span>' +
+              '<div class="plan-info">' +
+                '<div class="plan-title">' + item.title + '</div>' +
+                '<div class="plan-desc">' + item.desc + '</div>' +
+                '<div class="plan-meta"><span>⏱ ' + item.duration + '分钟</span></div>' +
+              '</div>' +
+              '<button class="btn btn-primary btn-sm plan-action" onclick="app.startPlanByIndex(' + i + ')">开始</button>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+  }
+
+  startQuickPractice() {
+    var rec = planGenerator.getRecommendedDifficulty();
+    this.showPage('practice');
+    var self = this;
+    setTimeout(function() {
+      self.selectDifficulty(rec);
+    }, 50);
+  }
+
+  startPlanByIndex(idx) {
+    var config = this._planConfigs[idx];
+    if (config) this.startPlanItem(config);
+  }
+
+  startPlanItem(config) {
+    this.showPage('practice');
+    var self = this;
+    setTimeout(function() {
+      if (config.mode) self.selectedMode = config.mode;
+      if (config.difficulty) self.selectedDifficulty = config.difficulty;
+      if (config.clef) self.selectedClef = config.clef;
+      if (config.sprintDuration) self.sprintDuration = config.sprintDuration;
+      if (config.noteCount) self.noteCount = config.noteCount;
+      if (config.targetNotes) self.targetNotes = config.targetNotes;
+      self.startPractice();
+    }, 50);
+  }
+
+  // ===== PRACTICE SETUP =====
+  renderPracticeSetup() {
+    var self = this;
+    var s = this.settings;
+    var diffHTML = DIFFICULTY_LEVELS.map(function(d, i) {
+      var icons = ['🌱','🌿','🌳','🏔️','👑'];
+      return '<div class="diff-card' + (i===0?' active':'') + '" id="diff-' + d.level + '" onclick="app.selectDifficulty(' + d.level + ')">' +
+        '<div class="diff-level">' + icons[i] + '</div>' +
+        '<div class="diff-name">Lv.' + d.level + ' ' + d.name + '</div>' +
+        '<div class="diff-desc">' + d.desc + '</div>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('practiceSetup').innerHTML =
+      '<div class="fade-in">' +
+        '<h2 style="margin-bottom:20px">选择练习模式</h2>' +
+        '<div class="mode-cards" style="margin-bottom:24px">' +
+          '<div class="mode-card active" id="mode-flash" onclick="app.selectMode(\'flash\')">' +
+            '<div class="mode-icon">⚡</div><div class="mode-name">闪卡速认</div><div class="mode-desc">快速识别随机音符</div>' +
+          '</div>' +
+          '<div class="mode-card" id="mode-sprint" onclick="app.selectMode(\'sprint\')">' +
+            '<div class="mode-icon">🏃</div><div class="mode-name">计时冲刺</div><div class="mode-desc">限时内尽可能多地识别</div>' +
+          '</div>' +
+          '<div class="mode-card" id="mode-clef_switch" onclick="app.selectMode(\'clef_switch\')">' +
+            '<div class="mode-icon">🔄</div><div class="mode-name">双谱切换</div><div class="mode-desc">高低音谱随机交替</div>' +
+          '</div>' +
+          '<div class="mode-card" id="mode-listen" onclick="app.selectMode(\'listen\')">' +
+            '<div class="mode-icon">👂</div><div class="mode-name">听音辨位</div><div class="mode-desc">听音高选择正确音名</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<h3 style="margin-bottom:12px">难度等级</h3>' +
+        '<div class="difficulty-cards" style="margin-bottom:24px">' + diffHTML + '</div>' +
+
+        '<h3 style="margin-bottom:12px">谱号选择</h3>' +
+        '<div class="difficulty-cards" style="margin-bottom:24px">' +
+          '<div class="diff-card active" id="clef-treble" onclick="app.selectClef(\'treble\')"><div class="diff-level">𝄞</div><div class="diff-name">高音谱</div></div>' +
+          '<div class="diff-card" id="clef-bass" onclick="app.selectClef(\'bass\')"><div class="diff-level">𝄢</div><div class="diff-name">低音谱</div></div>' +
+          '<div class="diff-card" id="clef-random" onclick="app.selectClef(\'random\')"><div class="diff-level">🔀</div><div class="diff-name">随机</div></div>' +
+        '</div>' +
+
+        '<div class="card" style="margin-bottom:20px">' +
+          '<div class="setting-row"><div><div class="setting-label">音效</div><div class="setting-desc">正确/错误音效反馈</div></div>' +
+            '<div class="toggle' + (s.sound?' active':'') + '" onclick="app.toggleSetting(\'sound\',this)"></div></div>' +
+          '<div class="setting-row"><div><div class="setting-label">限时答题</div><div class="setting-desc">根据难度自动计时</div></div>' +
+            '<div class="toggle' + (s.timeLimit?' active':'') + '" onclick="app.toggleSetting(\'timeLimit\',this)"></div></div>' +
+        '</div>' +
+
+        '<div style="text-align:center;padding:10px 0">' +
+          '<button class="btn btn-primary btn-lg" onclick="app.startPractice()" style="font-size:1.1rem;padding:16px 48px">开始练习</button>' +
+        '</div>' +
+      '</div>';
+
+    this.selectedMode = 'flash';
+    this.selectedDifficulty = 1;
+    this.selectedClef = 'treble';
+    document.getElementById('practiceArea').style.display = 'none';
+    document.getElementById('practiceSetup').style.display = 'block';
+  }
+
+  selectMode(mode) {
+    this.selectedMode = mode;
+    document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('active'); });
+    var el = document.getElementById('mode-' + mode);
+    if (el) el.classList.add('active');
+  }
+
+  selectDifficulty(diff) {
+    this.selectedDifficulty = diff;
+    document.querySelectorAll('.diff-card').forEach(function(c) { c.classList.remove('active'); });
+    var el = document.getElementById('diff-' + diff);
+    if (el) el.classList.add('active');
+  }
+
+  selectClef(clef) {
+    this.selectedClef = clef;
+    ['treble','bass','random'].forEach(function(c) {
+      var el = document.getElementById('clef-' + c);
+      if (el) el.classList.remove('active');
+    });
+    var el = document.getElementById('clef-' + clef);
+    if (el) el.classList.add('active');
+  }
+
+  toggleSetting(key, el) {
+    this.settings[key] = !this.settings[key];
+    el.classList.toggle('active');
+    if (key === 'sound') audio.enabled = this.settings.sound;
+    this.saveSettings();
+  }
+
+  togglePracticeHint(type) {
+    if (type === 'solfege') {
+      var chk = document.getElementById('chkSolfege');
+      this.settings.showSolfege = chk.checked;
+      var display = document.getElementById('solfegeDisplay');
+      if (display) display.style.display = chk.checked ? 'block' : 'none';
+      // Update answer buttons
+      document.querySelectorAll('.answer-btn').forEach(function(btn) {
+        var noteName = btn.dataset.note;
+        var solEl = btn.querySelector('.solfege-label');
+        if (chk.checked) {
+          if (!solEl) {
+            solEl = document.createElement('span');
+            solEl.className = 'solfege-label';
+            solEl.style.cssText = 'display:block;font-size:0.7rem;color:var(--purple);margin-top:2px';
+            btn.appendChild(solEl);
+          }
+          solEl.textContent = SOLFEGE[noteName];
+          solEl.style.display = 'block';
+        } else if (solEl) {
+          solEl.style.display = 'none';
+        }
+      });
+    } else if (type === 'piano') {
+      var chk = document.getElementById('chkPiano');
+      this.settings.showPiano = chk.checked;
+      var container = document.getElementById('pianoContainer');
+      if (container) container.style.display = chk.checked ? 'block' : 'none';
+      if (chk.checked) this.renderPianoHighlight(null);
+    }
+    this.saveSettings();
+  }
+
+  switchSound(preset) {
+    audio.setPreset(preset);
+    // Update button states
+    document.querySelectorAll('.practice-hint-bar .btn').forEach(function(btn) {
+      if (btn.onclick && btn.onclick.toString().indexOf('switchSound') >= 0) {
+        btn.className = 'btn btn-sm btn-outline';
+      }
+    });
+    // Re-render hint bar to update active state
+    var ps = this.practiceState;
+    if (ps) {
+      var hintBar = document.querySelector('.practice-hint-bar');
+      if (hintBar) {
+        var soundBtns = hintBar.querySelectorAll('[onclick*="switchSound"]');
+        soundBtns.forEach(function(btn) {
+          var key = btn.getAttribute('onclick').match(/'(\w+)'/)[1];
+          btn.className = 'btn btn-sm ' + (key === preset ? 'btn-primary' : 'btn-outline');
+        });
+      }
+    }
+    // Play a preview
+    var ps = this.practiceState;
+    if (ps && ps.currentNote) {
+      var freq = getFrequencyForKey(ps.currentNote.key);
+      audio.playNote(freq, 1.0);
+    }
+  }
+
+  replayNote() {
+    var ps = this.practiceState;
+    if (!ps || !ps.currentNote) return;
+    var freq = getFrequencyForKey(ps.currentNote.key);
+    audio.playNote(freq, 1.5);
+  }
+
+  // ===== PIANO KEYBOARD =====
+  renderPianoHighlight(note) {
+    var container = document.getElementById('pianoKeys');
+    if (!container) return;
+
+    // 2 octaves: C3-B3 (left) + C4-B4 (middle C octave)
+    var whiteNotes = [
+      {name:'C',octave:3},{name:'D',octave:3},{name:'E',octave:3},{name:'F',octave:3},
+      {name:'G',octave:3},{name:'A',octave:3},{name:'B',octave:3},
+      {name:'C',octave:4},{name:'D',octave:4},{name:'E',octave:4},{name:'F',octave:4},
+      {name:'G',octave:4},{name:'A',octave:4},{name:'B',octave:4}
+    ];
+    var blackNotes = [
+      {name:'C#',octave:3,pos:0.6},{name:'D#',octave:3,pos:1.6},
+      {name:'F#',octave:3,pos:3.6},{name:'G#',octave:3,pos:4.6},{name:'A#',octave:3,pos:5.6},
+      {name:'C#',octave:4,pos:7.6},{name:'D#',octave:4,pos:8.6},
+      {name:'F#',octave:4,pos:10.6},{name:'G#',octave:4,pos:11.6},{name:'A#',octave:4,pos:12.6}
+    ];
+
+    var keyWidth = 36;
+    var totalWidth = 14 * keyWidth;
+    container.style.width = totalWidth + 'px';
+    container.innerHTML = '';
+
+    // White keys
+    whiteNotes.forEach(function(wn, i) {
+      var key = document.createElement('div');
+      key.className = 'white-key';
+      key.style.left = (i * keyWidth) + 'px';
+
+      // Highlight matching note
+      if (note && note.name === wn.name && note.octave === wn.octave) {
+        key.classList.add('active');
+      }
+
+      var label = document.createElement('span');
+      label.className = 'key-label';
+      label.textContent = wn.name + wn.octave;
+      // Mark middle C specially
+      if (wn.name === 'C' && wn.octave === 4) {
+        label.style.color = '#6c63ff';
+        label.style.fontWeight = 'bold';
+        key.style.borderLeft = '2px solid #6c63ff';
+      }
+      key.appendChild(label);
+
+      key.addEventListener('click', function() {
+        var entry = PIANO_NOTES[wn.name + wn.octave];
+        if (entry) audio.playNote(entry.freq, 1.5);
+      });
+
+      container.appendChild(key);
+    });
+
+    // Black keys
+    blackNotes.forEach(function(bn) {
+      var key = document.createElement('div');
+      key.className = 'black-key';
+      key.style.left = (bn.pos * keyWidth) + 'px';
+
+      key.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var entry = PIANO_NOTES[bn.name + bn.octave];
+        if (entry) audio.playNote(entry.freq, 1.5);
+      });
+
+      container.appendChild(key);
+    });
+  }
+
+  // ===== PRACTICE ENGINE =====
+  startPractice() {
+    document.getElementById('practiceSetup').style.display = 'none';
+    document.getElementById('practiceArea').style.display = 'block';
+
+    var diff = DIFFICULTY_LEVELS[this.selectedDifficulty - 1];
+    var sprintDur = this.selectedMode === 'sprint' ? (this.sprintDuration || 60) : 0;
+    var totalNotes = this.selectedMode === 'sprint' ? 999 : (this.noteCount || 20);
+
+    this.practiceState = {
+      mode: this.selectedMode,
+      difficulty: this.selectedDifficulty,
+      clef: this.selectedClef,
+      total: totalNotes,
+      current: 0,
+      correct: 0,
+      combo: 0,
+      maxCombo: 0,
+      startTime: Date.now(),
+      questionStartTime: 0,
+      responseTimes: [],
+      sprintDuration: sprintDur,
+      sprintRemaining: sprintDur,
+      sprintTimer: null,
+      currentNote: null,
+      answered: false,
+      results: []
+    };
+
+    this.renderPracticeUI();
+    this.renderer = new ScoreRenderer('scoreCanvas');
+    this.renderer.init(420, 150);
+    this.nextQuestion();
+  }
+
+  renderPracticeUI() {
+    var ps = this.practiceState;
+    var self = this;
+    var showSolfege = self.settings.showSolfege || false;
+    var showPiano = self.settings.showPiano || false;
+
+    document.getElementById('practiceArea').innerHTML =
+      '<div class="practice-area slide-up">' +
+        '<div class="practice-bar">' +
+          '<div class="stat-item"><span>进度</span> <span class="stat-value" id="progressText">' + ps.current + '/' + (ps.mode==='sprint'?'∞':ps.total) + '</span></div>' +
+          '<div class="stat-item timer" id="timerDisplay" style="display:' + (ps.sprintDuration?'block':'none') + '"><span class="stat-value">' + ps.sprintDuration + 's</span></div>' +
+          '<div class="stat-item combo" id="comboDisplay" style="display:none">🔥 <span class="stat-value">0x</span></div>' +
+          '<div class="stat-item score">正确 <span class="stat-value" id="scoreText">' + ps.correct + '</span></div>' +
+        '</div>' +
+
+        '<div class="practice-hint-bar">' +
+          '<label class="hint-toggle"><input type="checkbox" id="chkSolfege" ' + (showSolfege?'checked':'') + ' onchange="app.togglePracticeHint(\'solfege\')"> 唱名</label>' +
+          '<label class="hint-toggle"><input type="checkbox" id="chkPiano" ' + (showPiano?'checked':'') + ' onchange="app.togglePracticeHint(\'piano\')"> 键位</label>' +
+          '<span style="margin-left:auto;display:flex;gap:4px;align-items:center">' +
+            '<span style="font-size:0.72rem;color:var(--text3);margin-right:4px">音色</span>' +
+            Object.keys(audio.presets).map(function(k) {
+              var p = audio.presets[k];
+              var active = audio.preset === k;
+              return '<button class="btn btn-sm ' + (active?'btn-primary':'btn-outline') + '" onclick="app.switchSound(\'' + k + '\')" style="padding:3px 8px;font-size:0.7rem">' + p.icon + '</button>';
+            }).join('') +
+          '</span>' +
+          (ps.mode === 'listen' ? '<button class="btn btn-sm btn-outline" onclick="app.replayNote()" style="margin-left:8px">🔊 重播</button>' : '') +
+        '</div>' +
+
+        '<div id="questionTimer" style="display:none;position:relative;width:52px;height:52px;margin:0 auto 8px">' +
+          '<svg width="52" height="52" viewBox="0 0 52 52">' +
+            '<circle cx="26" cy="26" r="22" fill="none" stroke="#333" stroke-width="3"/>' +
+            '<circle id="timerCircle" cx="26" cy="26" r="22" fill="none" stroke="var(--success)" stroke-width="3" stroke-dasharray="138.2" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 26 26)"/>' +
+          '</svg>' +
+          '<span id="timerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0.9rem;font-weight:700;color:var(--text)"></span>' +
+        '</div>' +
+
+        '<div class="score-display" id="scoreDisplay">' +
+          '<div id="scoreCanvas" style="width:100%;display:flex;justify-content:center"></div>' +
+          '<span class="hint" id="clefHint"></span>' +
+          '<span id="solfegeDisplay" style="display:' + (showSolfege?'block':'none') + ';text-align:center;font-size:1.1rem;color:var(--purple);margin-top:6px"></span>' +
+        '</div>' +
+
+        '<div class="answer-options" id="answerOptions">' +
+          NOTES.map(function(n) {
+            return '<button class="answer-btn" data-note="' + n + '" onclick="app.submitAnswer(\'' + n + '\')">' +
+              '<span style="color:' + NOTE_COLORS[n] + '">' + n + '</span>' +
+              '</button>';
+          }).join('') +
+        '</div>' +
+
+        '<div class="piano-container" id="pianoContainer" style="display:' + (showPiano?'block':'none') + '"><div class="piano" id="pianoKeys"></div></div>' +
+      '</div>';
+
+    if (showPiano) this.renderPianoHighlight(null);
+  }
+
+  _isRepeat(note, recent) {
+    var key = note.name + note.clef;
+    for (var i = 0; i < recent.length; i++) {
+      if (recent[i] === key) return true;
+    }
+    return false;
+  }
+
+  nextQuestion() {
+    var ps = this.practiceState;
+    if (!ps) return;
+
+    if (ps.mode !== 'sprint' && ps.current >= ps.total) {
+      this.endPractice();
+      return;
+    }
+
+    ps.answered = false;
+    ps.current++;
+
+    // Initialize recent notes tracker
+    if (!ps._recentNotes) ps._recentNotes = [];
+
+    var note;
+    var maxAttempts = 30;
+
+    if (ps.targetNotes && ps.targetNotes.length > 0 && Math.random() < 0.6) {
+      // Target weak notes mode
+      var targetName = randomItem(ps.targetNotes);
+      var attempts = 0;
+      do {
+        note = generateRandomNote(ps.difficulty, ps.clef);
+        attempts++;
+      } while ((note.name !== targetName || this._isRepeat(note, ps._recentNotes)) && attempts < maxAttempts);
+    } else {
+      // Normal mode — avoid recent notes
+      var attempts = 0;
+      do {
+        note = generateRandomNote(ps.difficulty, ps.clef);
+        attempts++;
+      } while (this._isRepeat(note, ps._recentNotes) && attempts < maxAttempts);
+    }
+
+    // Track recent notes (keep last 4)
+    ps._recentNotes.push(note.name + note.clef);
+    if (ps._recentNotes.length > 4) ps._recentNotes.shift();
+
+    ps.currentNote = note;
+    ps.questionStartTime = Date.now();
+
+    // In listen mode: show empty staff, don't reveal note position
+    if (ps.mode === 'listen') {
+      this.renderer.renderEmptyStaff(note.clef);
+    } else {
+      this.renderer.renderNote(note);
+    }
+    this.updatePracticeBar();
+
+    var clefHint = document.getElementById('clefHint');
+    if (clefHint) clefHint.textContent = note.clef === 'treble' ? '𝄞 高音谱' : '𝄢 低音谱';
+
+    // Hide hints until answered
+    var solfegeDisplay = document.getElementById('solfegeDisplay');
+    if (solfegeDisplay) solfegeDisplay.style.display = 'none';
+    if (this.settings.showPiano) this.renderPianoHighlight(null); // No highlight yet
+
+    // Reset answer buttons
+    document.querySelectorAll('.answer-btn').forEach(function(btn) {
+      btn.disabled = false;
+      btn.className = 'answer-btn';
+    });
+
+    // Start sprint timer
+    if (ps.sprintDuration && ps.mode === 'sprint' && !ps.sprintTimer) {
+      this.startSprintTimer();
+    }
+
+    // Per-question countdown timer
+    this.startQuestionTimer();
+
+    // Play note in listen mode
+    if (ps.mode === 'listen') {
+      var freq = getFrequencyForKey(ps.currentNote.key);
+      audio.playNote(freq, 0.5);
+    }
+  }
+
+  submitAnswer(answer) {
+    var ps = this.practiceState;
+    if (!ps || ps.answered) return;
+    ps.answered = true;
+
+    this.stopQuestionTimer();
+
+    var responseTime = Date.now() - ps.questionStartTime;
+    var correct = answer === ps.currentNote.name;
+
+    stats.recordAnswer(ps.currentNote.name, ps.currentNote.clef, correct, responseTime);
+    ps.responseTimes.push(responseTime);
+    ps.results.push({ note: ps.currentNote, answer: answer, correct: correct, time: responseTime });
+
+    if (correct) {
+      ps.correct++;
+      ps.combo++;
+      if (ps.combo > ps.maxCombo) ps.maxCombo = ps.combo;
+      audio.playCorrect();
+
+      var btn = document.querySelector('.answer-btn[data-note="' + answer + '"]');
+      if (btn) btn.classList.add('correct');
+
+      if (ps.combo > 0 && ps.combo % 10 === 0) {
+        audio.playCombo(ps.combo);
+        this.showComboFlash(ps.combo);
+      }
+    } else {
+      ps.combo = 0;
+      audio.playWrong();
+
+      var wrongBtn = document.querySelector('.answer-btn[data-note="' + answer + '"]');
+      var correctBtn = document.querySelector('.answer-btn[data-note="' + ps.currentNote.name + '"]');
+      if (wrongBtn) wrongBtn.classList.add('wrong');
+      if (correctBtn) correctBtn.classList.add('correct');
+    }
+
+    this.updatePracticeBar();
+    document.querySelectorAll('.answer-btn').forEach(function(b) { b.disabled = true; });
+
+    // Show note on staff after answering (especially for listen mode)
+    this.renderer.renderNote(ps.currentNote);
+
+    // Show solfège AFTER answering
+    if (this.settings.showSolfege) {
+      var solfegeDisplay = document.getElementById('solfegeDisplay');
+      if (solfegeDisplay) {
+        solfegeDisplay.textContent = SOLFEGE[ps.currentNote.name] || '';
+        solfegeDisplay.style.display = 'block';
+      }
+    }
+    // Show piano key AFTER answering
+    if (this.settings.showPiano) this.renderPianoHighlight(ps.currentNote);
+
+    var self = this;
+    setTimeout(function() {
+      if (ps.mode === 'sprint' && ps.sprintRemaining <= 0) {
+        self.endPractice();
+      } else {
+        self.nextQuestion();
+      }
+    }, correct ? 600 : 1200);
+  }
+
+  startQuestionTimer() {
+    var ps = this.practiceState;
+    if (!ps) return;
+
+    // Clear previous timer
+    if (ps.questionTimerInterval) {
+      clearInterval(ps.questionTimerInterval);
+      ps.questionTimerInterval = null;
+    }
+    if (ps.questionTimer) {
+      clearTimeout(ps.questionTimer);
+      ps.questionTimer = null;
+    }
+
+    var timerEl = document.getElementById('questionTimer');
+    var circleEl = document.getElementById('timerCircle');
+    var textEl = document.getElementById('timerText');
+
+    // Only show if timeLimit is enabled and not sprint mode
+    if (!this.settings.timeLimit || ps.mode === 'sprint') {
+      if (timerEl) timerEl.style.display = 'none';
+      return;
+    }
+
+    var level = DIFFICULTY_LEVELS[ps.difficulty - 1];
+    var limitMs = level.timeLimit;
+    if (!limitMs || limitMs <= 0) {
+      if (timerEl) timerEl.style.display = 'none';
+      return;
+    }
+
+    var totalSec = Math.ceil(limitMs / 1000);
+    var circumference = 2 * Math.PI * 22; // r=22
+    var remaining = limitMs;
+    var self = this;
+
+    if (timerEl) timerEl.style.display = 'block';
+    if (textEl) textEl.textContent = totalSec;
+    if (circleEl) {
+      circleEl.style.stroke = 'var(--success)';
+      circleEl.setAttribute('stroke-dashoffset', '0');
+    }
+
+    var startTime = Date.now();
+
+    ps.questionTimerInterval = setInterval(function() {
+      if (ps.answered) {
+        clearInterval(ps.questionTimerInterval);
+        ps.questionTimerInterval = null;
+        return;
+      }
+
+      var elapsed = Date.now() - startTime;
+      remaining = Math.max(0, limitMs - elapsed);
+      var sec = Math.ceil(remaining / 1000);
+      var progress = 1 - (remaining / limitMs);
+
+      if (textEl) textEl.textContent = sec;
+      if (circleEl) {
+        circleEl.setAttribute('stroke-dashoffset', (progress * circumference).toFixed(1));
+        // Color: green → yellow → red
+        if (progress < 0.5) {
+          circleEl.style.stroke = 'var(--success)';
+        } else if (progress < 0.8) {
+          circleEl.style.stroke = 'var(--warning)';
+        } else {
+          circleEl.style.stroke = 'var(--danger)';
+        }
+      }
+
+      if (remaining <= 0) {
+        clearInterval(ps.questionTimerInterval);
+        ps.questionTimerInterval = null;
+        if (!ps.answered) self.submitAnswer(null);
+      }
+    }, 50); // Update every 50ms for smooth animation
+  }
+
+  stopQuestionTimer() {
+    var ps = this.practiceState;
+    if (!ps) return;
+    if (ps.questionTimerInterval) {
+      clearInterval(ps.questionTimerInterval);
+      ps.questionTimerInterval = null;
+    }
+    if (ps.questionTimer) {
+      clearTimeout(ps.questionTimer);
+      ps.questionTimer = null;
+    }
+    var timerEl = document.getElementById('questionTimer');
+    if (timerEl) timerEl.style.display = 'none';
+  }
+
+  startSprintTimer() {
+    var ps = this.practiceState;
+    var self = this;
+    ps.sprintTimer = setInterval(function() {
+      ps.sprintRemaining--;
+      var timerEl = document.querySelector('#timerDisplay .stat-value');
+      if (timerEl) timerEl.textContent = ps.sprintRemaining + 's';
+      if (ps.sprintRemaining <= 0) {
+        clearInterval(ps.sprintTimer);
+        ps.sprintTimer = null;
+        if (!ps.answered) self.endPractice();
+      }
+    }, 1000);
+  }
+
+  updatePracticeBar() {
+    var ps = this.practiceState;
+    var progressEl = document.getElementById('progressText');
+    var scoreEl = document.getElementById('scoreText');
+    var comboEl = document.getElementById('comboDisplay');
+    if (progressEl) progressEl.textContent = ps.current + '/' + (ps.mode==='sprint'?'∞':ps.total);
+    if (scoreEl) scoreEl.textContent = ps.correct;
+    if (comboEl) {
+      comboEl.style.display = ps.combo > 0 ? 'flex' : 'none';
+      comboEl.querySelector('.stat-value').textContent = ps.combo + 'x';
+    }
+  }
+
+  showComboFlash(count) {
+    var flash = document.querySelector('.combo-flash');
+    if (!flash) {
+      flash = document.createElement('div');
+      flash.className = 'combo-flash';
+      document.body.appendChild(flash);
+    }
+    flash.textContent = count + ' COMBO!';
+    flash.className = 'combo-flash';
+    void flash.offsetWidth;
+    flash.className = 'combo-flash show';
+  }
+
+  // ===== PRACTICE END =====
+  endPractice() {
+    var ps = this.practiceState;
+    if (!ps) return;
+
+    if (ps.sprintTimer) { clearInterval(ps.sprintTimer); ps.sprintTimer = null; }
+
+    var duration = Date.now() - ps.startTime;
+    var accuracy = ps.current > 0 ? Math.round((ps.correct / ps.current) * 100) : 0;
+    var avgTime = ps.responseTimes.length > 0
+      ? Math.round(ps.responseTimes.reduce(function(a,b){return a+b},0) / ps.responseTimes.length) : 0;
+
+    stats.recordSession({
+      difficulty: ps.difficulty, mode: ps.mode, clef: ps.clef,
+      total: ps.current, correct: ps.correct, accuracy: accuracy,
+      avgTime: avgTime, duration: duration, maxCombo: ps.maxCombo
+    });
+
+    audio.playFanfare();
+
+    // Per-note breakdown
+    var noteBreakdown = {};
+    ps.results.forEach(function(r) {
+      var n = r.note.name;
+      if (!noteBreakdown[n]) noteBreakdown[n] = { correct: 0, total: 0 };
+      noteBreakdown[n].total++;
+      if (r.correct) noteBreakdown[n].correct++;
+    });
+
+    var icon = accuracy >= 90 ? '🎉' : accuracy >= 70 ? '👍' : '💪';
+    var title = accuracy >= 90 ? '太棒了！' : accuracy >= 70 ? '做得不错！' : '继续加油！';
+    var modeNames = { flash:'闪卡速认', sprint:'计时冲刺', clef_switch:'双谱切换', listen:'听音辨位' };
+    var self = this;
+
+    var breakdownHTML = NOTES.map(function(n) {
+      var bd = noteBreakdown[n];
+      if (!bd) return '';
+      var pct = Math.round((bd.correct / bd.total) * 100);
+      var color = NOTE_COLORS[n];
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+        '<span style="width:20px;font-weight:700;color:' + color + '">' + n + '</span>' +
+        '<div class="weak-note-bar" style="flex:1"><div class="weak-note-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+        '<span style="width:40px;font-size:0.8rem;color:var(--text2)">' + pct + '%</span>' +
+        '<span style="width:50px;font-size:0.75rem;color:var(--text3)">' + bd.correct + '/' + bd.total + '</span>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('practiceArea').innerHTML =
+      '<div class="results-panel fade-in">' +
+        '<div class="result-icon">' + icon + '</div>' +
+        '<div class="result-title">' + title + '</div>' +
+        '<div class="result-subtitle">Lv.' + ps.difficulty + ' ' + DIFFICULTY_LEVELS[ps.difficulty-1].name + ' · ' + (modeNames[ps.mode]||ps.mode) + '</div>' +
+        '<div class="results-grid">' +
+          '<div class="result-stat"><div class="result-stat-value" style="color:var(--success)">' + accuracy + '%</div><div class="result-stat-label">正确率</div></div>' +
+          '<div class="result-stat"><div class="result-stat-value" style="color:var(--info)">' + avgTime + 'ms</div><div class="result-stat-label">平均反应</div></div>' +
+          '<div class="result-stat"><div class="result-stat-value" style="color:var(--pink)">' + ps.maxCombo + 'x</div><div class="result-stat-label">最大连击</div></div>' +
+        '</div>' +
+        '<div class="card" style="text-align:left;max-width:400px;margin:0 auto 20px">' +
+          '<div class="card-title" style="margin-bottom:10px">各音符正确率</div>' + breakdownHTML +
+        '</div>' +
+        '<div style="margin-top:12px"><span class="badge badge-level">EXP +' + (ps.correct*10) + '</span></div>' +
+        '<div style="display:flex;gap:12px;justify-content:center;margin-top:24px">' +
+          '<button class="btn btn-primary btn-lg" onclick="app.startPractice()">再来一次</button>' +
+          '<button class="btn btn-outline btn-lg" onclick="app.renderPracticeSetup()">返回设置</button>' +
+        '</div>' +
+      '</div>';
+
+    this.practiceState = null;
+  }
+
+  // ===== STATS PAGE =====
+  renderStats() {
+    var noteAcc = stats.getNoteAccuracy();
+    var clefComp = stats.getClefComparison();
+    var weakNotes = stats.getWeakNotes(7);
+    var timeTrend = stats.getTimeTrend(14);
+
+    var heatmapHTML = NOTES.map(function(n) {
+      var acc = noteAcc[n];
+      var color = NOTE_COLORS[n];
+      var bg = acc.accuracy >= 0 ? 'rgba(' + hexToRgb(color) + ',' + Math.max(0.1,acc.accuracy/100) + ')' : 'var(--bg3)';
+      return '<div class="heatmap-cell" style="background:' + bg + ';color:' + (acc.accuracy>=70?'#fff':'var(--text3)') + '">' +
+        '<span class="note-name">' + n + '</span><span class="note-pct">' + (acc.accuracy>=0?acc.accuracy+'%':'-') + '</span></div>';
+    }).join('');
+
+    var weakHTML = weakNotes.length > 0 ? weakNotes.map(function(wn) {
+      var color = NOTE_COLORS[wn.name];
+      var pct = Math.round((1-wn.errorRate)*100);
+      return '<div class="weak-note-item">' +
+        '<div class="weak-note-name" style="background:' + color + '20;color:' + color + '">' + wn.name + '</div>' +
+        '<div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">' +
+          '<span>正确率 ' + pct + '%</span><span style="color:var(--text3)">平均 ' + Math.round(wn.avgTime) + 'ms · ' + wn.total + '题</span></div>' +
+        '<div class="weak-note-bar"><div class="weak-note-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div></div></div>';
+    }).join('') : '<div style="text-align:center;color:var(--text3);padding:20px">暂无数据</div>';
+
+    var calendarHTML = '';
+    var calData = stats.getCalendarData();
+    var dates = Object.keys(calData).reverse();
+    dates.forEach(function(date) {
+      var data = calData[date];
+      var level = 0;
+      if (data) {
+        if (data.count >= 100) level = 4;
+        else if (data.count >= 50) level = 3;
+        else if (data.count >= 20) level = 2;
+        else level = 1;
+      }
+      calendarHTML += '<div class="calendar-cell level-' + level + '" title="' + date + ': ' + (data?data.count+'题':'无') + '"></div>';
+    });
+
+    var historyHTML = '';
+    if (stats.data.history.length > 0) {
+      var modeNames = { flash:'闪卡', sprint:'冲刺', clef_switch:'双谱', listen:'听音' };
+      historyHTML = '<div style="overflow-x:auto"><table style="width:100%;font-size:0.8rem;border-collapse:collapse"><thead>' +
+        '<tr style="color:var(--text3);border-bottom:1px solid var(--border)"><th style="text-align:left;padding:8px">日期</th><th style="text-align:left;padding:8px">模式</th><th style="text-align:left;padding:8px">难度</th><th style="text-align:right;padding:8px">正确率</th><th style="text-align:right;padding:8px">反应</th><th style="text-align:right;padding:8px">连击</th></tr></thead><tbody>';
+      stats.data.history.slice(0,20).forEach(function(h) {
+        var d = new Date(h.date);
+        var dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+        var accColor = h.accuracy>=80?'var(--success)':h.accuracy>=60?'var(--warning)':'var(--danger)';
+        historyHTML += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">' +
+          '<td style="padding:8px">' + dateStr + '</td><td style="padding:8px">' + (modeNames[h.mode]||h.mode) + '</td>' +
+          '<td style="padding:8px">Lv.' + h.difficulty + '</td><td style="padding:8px;text-align:right;color:' + accColor + '">' + h.accuracy + '%</td>' +
+          '<td style="padding:8px;text-align:right">' + h.avgTime + 'ms</td><td style="padding:8px;text-align:right;color:var(--pink)">' + h.combo + 'x</td></tr>';
+      });
+      historyHTML += '</tbody></table></div>';
+    } else {
+      historyHTML = '<div style="text-align:center;color:var(--text3);padding:30px">暂无练习记录</div>';
+    }
+
+    document.getElementById('statsContent').innerHTML =
+      '<div class="fade-in">' +
+        '<div class="page-header"><div><div class="page-title">练习统计</div><div class="page-desc">查看你的识谱练习数据</div></div></div>' +
+        '<div class="grid grid-4" style="margin-bottom:20px">' +
+          '<div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">' + stats.data.totalSessions + '</div><div class="stat-label">总练习次数</div></div>' +
+          '<div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-number">' + (stats.data.totalNotes>0?Math.round(stats.data.totalCorrect/stats.data.totalNotes*100):0) + '%</div><div class="stat-label">总正确率</div></div>' +
+          '<div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-number">' + stats.data.streak + '</div><div class="stat-label">连续打卡</div></div>' +
+          '<div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-number">' + (stats.data.history.length>0?Math.round(stats.data.history.reduce(function(s,h){return s+h.avgTime},0)/stats.data.history.length):0) + 'ms</div><div class="stat-label">平均反应</div></div>' +
+        '</div>' +
+        '<div class="grid grid-2">' +
+          '<div class="card"><div class="card-title" style="margin-bottom:12px">各音符正确率</div><div class="heatmap-grid">' + heatmapHTML + '</div></div>' +
+          '<div class="card"><div class="card-title" style="margin-bottom:12px">谱号对比</div>' +
+            '<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>𝄞 高音谱</span><span style="color:var(--primary2)">' + clefComp.treble + '%</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:' + clefComp.treble + '%;background:var(--primary)"></div></div><div style="font-size:0.75rem;color:var(--text3);margin-top:4px">' + clefComp.trebleTotal + ' 题</div></div>' +
+            '<div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>𝄢 低音谱</span><span style="color:var(--cyan)">' + clefComp.bass + '%</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:' + clefComp.bass + '%;background:var(--cyan)"></div></div><div style="font-size:0.75rem;color:var(--text3);margin-top:4px">' + clefComp.bassTotal + ' 题</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card" style="margin-top:16px"><div class="card-title" style="margin-bottom:12px">薄弱音符 Top ' + weakNotes.length + '</div>' + weakHTML + '</div>' +
+        '<div class="card" style="margin-top:16px"><div class="card-title" style="margin-bottom:12px">练习日历 (近90天)</div><div class="calendar-heatmap">' + calendarHTML + '</div></div>' +
+        '<div class="card" style="margin-top:16px"><div class="card-title" style="margin-bottom:12px">反应时间趋势</div><div class="chart-container"><canvas id="timeTrendChart"></canvas></div></div>' +
+        '<div class="card" style="margin-top:16px"><div class="card-title" style="margin-bottom:12px">练习历史</div>' + historyHTML + '</div>' +
+        '<div style="text-align:center;margin-top:20px"><button class="btn btn-danger btn-sm" onclick="if(confirm(\'确定重置所有数据?\')){stats.reset();app.renderStats();showToast(\'已重置\',\'info\')}">重置所有数据</button></div>' +
+      '</div>';
+
+    var self = this;
+    setTimeout(function() { self.renderTimeTrendChart(timeTrend); }, 100);
+  }
+
+  renderTimeTrendChart(trend) {
+    var canvas = document.getElementById('timeTrendChart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var container = canvas.parentElement;
+    canvas.width = container.clientWidth || 500;
+    canvas.height = 250;
+
+    var data = trend.filter(function(t) { return t.avgTime !== null; });
+    if (data.length === 0) {
+      ctx.fillStyle = '#666680';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('暂无数据', canvas.width/2, canvas.height/2);
+      return;
+    }
+
+    var pad = { top:20, right:20, bottom:40, left:50 };
+    var w = canvas.width - pad.left - pad.right;
+    var h = canvas.height - pad.top - pad.bottom;
+    var maxTime = Math.max.apply(null, data.map(function(d){return d.avgTime})) || 3000;
+
+    ctx.strokeStyle = '#333355';
+    ctx.lineWidth = 0.5;
+    for (var i = 0; i <= 4; i++) {
+      var y = pad.top + (h/4)*i;
+      ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+w,y); ctx.stroke();
+      ctx.fillStyle = '#666680'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText(Math.round(maxTime - (maxTime/4)*i) + 'ms', pad.left-8, y+4);
+    }
+
+    ctx.strokeStyle = '#6c63ff'; ctx.lineWidth = 2; ctx.beginPath();
+    data.forEach(function(d, i) {
+      var x = pad.left + (w/(data.length-1||1))*i;
+      var y = pad.top + h - ((d.avgTime/maxTime)*h);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+
+    data.forEach(function(d, i) {
+      var x = pad.left + (w/(data.length-1||1))*i;
+      var y = pad.top + h - ((d.avgTime/maxTime)*h);
+      ctx.fillStyle = '#6c63ff'; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#666680'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(d.date.slice(5), x, canvas.height-10);
+    });
+  }
+
+  // ===== PLAN PAGE =====
+  renderPlan() {
+    var plan = planGenerator.generateDailyPlan();
+    var achievements = planGenerator.getAchievements();
+    var totalMin = plan.reduce(function(s,p){return s+p.duration},0);
+    this._planConfigs = plan.map(function(p){return p.config});
+
+    var planHTML = plan.map(function(item, i) {
+      return '<div class="plan-item"><span class="plan-icon">' + item.icon + '</span>' +
+        '<div class="plan-info"><div class="plan-title">' + item.title + '</div><div class="plan-desc">' + item.desc + '</div>' +
+        '<div class="plan-meta"><span>⏱ ' + item.duration + '分钟</span></div></div>' +
+        '<button class="btn btn-primary btn-sm plan-action" onclick="app.startPlanByIndex(' + i + ')">开始</button></div>';
+    }).join('');
+
+    var achHTML = achievements.map(function(a) {
+      return '<div style="text-align:center;padding:12px;background:' + (a.unlocked?'rgba(108,99,255,0.1)':'var(--bg3)') + ';border-radius:8px;opacity:' + (a.unlocked?1:0.4) + '">' +
+        '<div style="font-size:1.5rem;margin-bottom:4px">' + a.icon + '</div><div style="font-size:0.85rem;font-weight:600">' + a.name + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--text3);margin-top:2px">' + a.desc + '</div>' +
+        (a.unlocked?'<div style="font-size:0.7rem;color:var(--success);margin-top:4px">✅ 已解锁</div>':'') + '</div>';
+    }).join('');
+
+    document.getElementById('planContent').innerHTML =
+      '<div class="fade-in">' +
+        '<div class="page-header"><div><div class="page-title">练习计划</div><div class="page-desc">根据你的练习数据智能生成</div></div><span class="badge badge-primary">预计 ' + totalMin + ' 分钟</span></div>' +
+        '<div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(34,211,238,0.08))">' +
+          '<div style="display:flex;align-items:center;gap:12px"><span style="font-size:1.5rem">💡</span><div><div style="font-weight:600">训练建议</div><div style="color:var(--text2);font-size:0.85rem;margin-top:2px">' + planGenerator.getMotivationMessage() + '</div></div></div>' +
+        '</div>' + planHTML +
+        '<div class="card" style="margin-top:24px"><div class="card-title" style="margin-bottom:12px">🏆 成就墙</div><div class="grid grid-3">' + achHTML + '</div></div>' +
+      '</div>';
+  }
+
+  // ===== ACHIEVEMENTS PAGE =====
+  renderAchievements() {
+    var achievements = planGenerator.getAchievements();
+    var unlocked = achievements.filter(function(a){return a.unlocked}).length;
+
+    var achHTML = achievements.map(function(a) {
+      return '<div class="card" style="text-align:center;' + (a.unlocked?'border-color:var(--primary)':'opacity:0.5') + '">' +
+        '<div style="font-size:2rem;margin-bottom:8px">' + a.icon + '</div>' +
+        '<div style="font-weight:700;font-size:1rem;margin-bottom:4px">' + a.name + '</div>' +
+        '<div style="font-size:0.8rem;color:var(--text2)">' + a.desc + '</div>' +
+        '<div style="margin-top:8px"><span class="badge ' + (a.unlocked?'badge-success':'badge-primary') + '">' + (a.unlocked?'已解锁':'未解锁') + '</span></div></div>';
+    }).join('');
+
+    document.getElementById('achievementsContent').innerHTML =
+      '<div class="fade-in">' +
+        '<div class="page-header"><div><div class="page-title">成就系统</div><div class="page-desc">' + unlocked + ' / ' + achievements.length + ' 已解锁</div></div></div>' +
+        '<div class="progress-bar" style="margin-bottom:24px;height:8px"><div class="progress-bar-fill" style="width:' + (unlocked/achievements.length*100) + '%"></div></div>' +
+        '<div class="grid grid-3">' + achHTML + '</div>' +
+      '</div>';
+  }
+}
+
+function hexToRgb(hex) {
+  var r = parseInt(hex.slice(1,3),16);
+  var g = parseInt(hex.slice(3,5),16);
+  var b = parseInt(hex.slice(5,7),16);
+  return r+','+g+','+b;
+}
+
+function showToast(message, type) {
+  type = type || 'info';
+  var container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  var toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+}
+
+// ===== Init =====
+var app;
+try { app = new App(); } catch(e) { console.error('App constructor error:', e); }
+
+function initApp() {
+  if (!app) { try { app = new App(); } catch(e) { console.error(e); } }
+  if (app) {
+    try { app.init(); } catch(e) {
+      console.error('Init error:', e);
+      document.getElementById('homeContent').innerHTML = '<div class="card" style="color:#f87171;padding:40px">初始化出错: ' + e.message + '</div>';
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+</script></body></html>
