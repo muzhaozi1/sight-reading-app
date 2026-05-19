@@ -148,10 +148,18 @@ var Metronome = (function() {
       case 'triplet':     return [1/3, 1/3, 1/3];
       case 'sixteenth':   return [0.25, 0.25, 0.25, 0.25];
       case 'q_e':         return [2/3, 1/3];           // 前四后八
+      case 'e_q':         return [1/3, 2/3];           // 前八后四
       case 'e_s':         return [0.5, 0.25, 0.25];    // 前八后十六
       case 's_e':         return [0.25, 0.25, 0.5];    // 前十六后八
       case 'dotted':      return [0.75, 0.25];         // 附点
+      case 'rev_dotted':  return [0.25, 0.75];         // 后附点
       case 'syncopation': return [0.25, 0.5, 0.25];   // 切分
+      case 'swing':       return [2/3, 1/3];           // Swing (摇摆)
+      case 'shuffle':     return [0.65, 0.35];         // Shuffle (拖曳)
+      case 'compound_2':  return [1/3, 1/3, 1/3];     // 复合二拍 (6/8 feel)
+      case 'compound_3':  return [0.25, 0.25, 0.25, 0.25]; // 复合三拍
+      case 'bossa':       return [0.35, 0.3, 0.35];   // Bossa Nova
+      case 'tresillo':    return [0.375, 0.375, 0.25]; // Tresillo (3+3+2)
       default:            return [1];
     }
   };
@@ -398,6 +406,7 @@ var ScalePractice = (function() {
     this.currentPassTotal = 0;
     this.sessionStats = { startTime: 0, totalNotes: 0, correctNotes: 0, bpmHistory: [] };
     this._countInMetro = null;
+    this._standaloneMetro = null;  // 独立节拍器
     this.practiceRound = 0;  // 练习次数计数
   }
 
@@ -448,10 +457,17 @@ var ScalePractice = (function() {
       ['triplet','三连音 ♪♪♪'],
       ['sixteenth','十六分音符 ♬♬♬♬'],
       ['q_e','前四后八 ♩♪'],
+      ['e_q','前八后四 ♪♩'],
       ['e_s','前八后十六 ♪♬♬'],
       ['s_e','前十六后八 ♬♬♪'],
-      ['dotted','附点节奏 ♩.♪'],
-      ['syncopation','切分节奏 ♬♩♬']
+      ['dotted','附点 ♩.♪'],
+      ['rev_dotted','后附点 ♪♩.'],
+      ['syncopation','切分 ♬♩♬'],
+      ['swing','Swing ♩♪'],
+      ['shuffle','Shuffle ♪♪'],
+      ['compound_2','复合二拍 ♪♪♪'],
+      ['bossa','Bossa Nova'],
+      ['tresillo','Tresillo 3+3+2']
     ];
     for (var i = 0; i < subs.length; i++) {
       subOptions += '<option value="' + subs[i][0] + '"' + (subs[i][0] === c.subdivision ? ' selected' : '') + '>' + subs[i][1] + '</option>';
@@ -460,6 +476,30 @@ var ScalePractice = (function() {
     document.getElementById('scaleSetup').innerHTML =
       '<div class="fade-in">' +
         '<div class="page-header"><div><div class="page-title">🎼 音阶跟练</div><div class="page-desc">节拍器驱动的音阶练习，支持指法提示和自适应速度</div></div></div>' +
+
+        // Standalone Metronome Card
+        '<div class="card" id="standaloneMetroCard">' +
+          '<div class="card-header"><span class="card-title">🥁 节拍器</span>' +
+            '<button class="btn btn-sm' + (this._standaloneMetro ? ' btn-danger' : ' btn-primary') + '" id="standaloneMetroBtn" onclick="app.scalePractice.toggleStandaloneMetro()">' +
+              (this._standaloneMetro ? '⏹ 停止' : '▶ 开始') +
+            '</button>' +
+          '</div>' +
+          '<div class="beat-indicator" id="standaloneBeatIndicator" style="margin-bottom:10px">' + this._renderBeatIndicatorDots() + '</div>' +
+          '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+            '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:0.8rem;color:var(--text2)">BPM</span>' +
+              '<input type="range" id="metroBpmSlider" min="20" max="300" value="' + c.bpm + '" class="bpm-slider" style="width:120px" oninput="app.scalePractice.setMetroBpm(+this.value)">' +
+              '<span class="stat-value" id="metroBpmDisplay" style="color:var(--warning);min-width:35px">' + c.bpm + '</span>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:0.8rem;color:var(--text2)">拍号</span>' +
+              '<select id="metroTimeSig" class="scale-select" style="min-width:60px" onchange="app.scalePractice.setMetroTimeSig(+this.value)">' + timeSigOptions + '</select>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:0.8rem;color:var(--text2)">细分</span>' +
+              '<select id="metroSubdivision" class="scale-select" style="min-width:100px" onchange="app.scalePractice.setMetroSubdivision(this.value)">' + subOptions + '</select>' +
+            '</div>' +
+            '<div id="metroBeatDots" class="beat-dots">' + this._renderBeatDots() + '</div>' +
+            '<button class="btn btn-sm btn-outline" onclick="app.scalePractice.metroTapTempo()">TAP</button>' +
+          '</div>' +
+        '</div>' +
 
         '<div class="grid grid-2">' +
           // Scale Selection Card
@@ -607,6 +647,87 @@ var ScalePractice = (function() {
     this.config[key] = !this.config[key];
     el.classList.toggle('active');
     if (key === 'adaptiveTempo') this.renderSetup();
+  };
+
+  // === Standalone Metronome ===
+  ScalePractice.prototype.toggleStandaloneMetro = function() {
+    if (this._standaloneMetro) {
+      this._standaloneMetro.stop();
+      this._standaloneMetro = null;
+      var btn = document.getElementById('standaloneMetroBtn');
+      if (btn) { btn.textContent = '▶ 开始'; btn.className = 'btn btn-sm btn-primary'; }
+      // Clear beat indicator
+      for (var i = 0; i < this.config.timeSigBeats; i++) {
+        var el = document.getElementById('biDot' + i);
+        if (el) el.classList.remove('active');
+      }
+    } else {
+      audio.init();
+      audio.resume();
+      this._standaloneMetro = new Metronome(audio.ctx);
+      this._standaloneMetro.bpm = this.config.bpm;
+      this._standaloneMetro.setTimeSig(this.config.timeSigBeats);
+      this._standaloneMetro.subdivision = this.config.subdivision;
+      var self = this;
+      this._standaloneMetro.onBeat = function(beatIndex, time, beatType, isMainBeat) {
+        if (isMainBeat) {
+          var beatInBar = beatIndex % self.config.timeSigBeats;
+          for (var i = 0; i < self.config.timeSigBeats; i++) {
+            var el = document.getElementById('biDot' + i);
+            if (el) el.classList.toggle('active', i === beatInBar);
+          }
+        }
+      };
+      this._standaloneMetro.start();
+      var btn = document.getElementById('standaloneMetroBtn');
+      if (btn) { btn.textContent = '⏹ 停止'; btn.className = 'btn btn-sm btn-danger'; }
+    }
+  };
+
+  ScalePractice.prototype.setMetroBpm = function(bpm) {
+    this.config.bpm = Math.max(20, Math.min(300, bpm));
+    var slider = document.getElementById('metroBpmSlider');
+    var display = document.getElementById('metroBpmDisplay');
+    var bpmInput = document.getElementById('bpmInput');
+    var bpmSlider = document.getElementById('bpmSlider');
+    if (slider) slider.value = this.config.bpm;
+    if (display) display.textContent = this.config.bpm;
+    if (bpmInput) bpmInput.value = this.config.bpm;
+    if (bpmSlider) bpmSlider.value = this.config.bpm;
+    if (this._standaloneMetro) this._standaloneMetro.setBpm(this.config.bpm);
+  };
+
+  ScalePractice.prototype.setMetroTimeSig = function(beats) {
+    this.config.timeSigBeats = beats;
+    if (this._standaloneMetro) this._standaloneMetro.setTimeSig(beats);
+    var dots = document.getElementById('metroBeatDots');
+    if (dots) dots.innerHTML = this._renderBeatDots();
+    var biDots = document.getElementById('standaloneBeatIndicator');
+    if (biDots) biDots.innerHTML = this._renderBeatIndicatorDots();
+    // Also update the main settings
+    var mainTimeSig = document.getElementById('timeSig');
+    if (mainTimeSig) mainTimeSig.value = beats;
+  };
+
+  ScalePractice.prototype.setMetroSubdivision = function(sub) {
+    this.config.subdivision = sub;
+    if (this._standaloneMetro) this._standaloneMetro.subdivision = sub;
+    var mainSub = document.getElementById('subdivision');
+    if (mainSub) mainSub.value = sub;
+  };
+
+  ScalePractice.prototype.metroTapTempo = function() {
+    if (!this._standaloneMetro) this._standaloneMetro = new Metronome(audio.ctx);
+    var bpm = this._standaloneMetro.tapTempo();
+    this.config.bpm = bpm;
+    var slider = document.getElementById('metroBpmSlider');
+    var display = document.getElementById('metroBpmDisplay');
+    var bpmInput = document.getElementById('bpmInput');
+    var bpmSlider = document.getElementById('bpmSlider');
+    if (slider) slider.value = bpm;
+    if (display) display.textContent = bpm;
+    if (bpmInput) bpmInput.value = bpm;
+    if (bpmSlider) bpmSlider.value = bpm;
   };
 
   // === Practice Flow ===

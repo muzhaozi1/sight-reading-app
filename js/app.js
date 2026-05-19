@@ -85,6 +85,7 @@ class App {
     if (this.currentPage === 'scale' && this.scalePractice) {
       if (this.scalePractice._countInMetro) { this.scalePractice._countInMetro.stop(); this.scalePractice._countInMetro = null; }
       if (this.scalePractice.metronome) { this.scalePractice.metronome.stop(); this.scalePractice.metronome = null; }
+      if (this.scalePractice._standaloneMetro) { this.scalePractice._standaloneMetro.stop(); this.scalePractice._standaloneMetro = null; }
     }
 
     this.currentPage = page;
