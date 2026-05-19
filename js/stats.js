@@ -45,7 +45,18 @@ class StatsManager {
       // Daily records for calendar heatmap: { "2026-05-16": { count: 50, correct: 45 } }
       dailyRecords: {},
       // Achievements
-      achievements: []
+      achievements: [],
+      // Scale practice stats
+      scaleStats: {
+        totalSessions: 0,
+        totalScales: 0,
+        totalScaleNotes: 0,
+        totalScaleCorrect: 0,
+        byScaleType: {},
+        byRootNote: {},
+        bpmProgress: []
+      },
+      scaleHistory: []
     };
   }
 
@@ -146,6 +157,53 @@ class StatsManager {
     // Check achievements
     this.checkAchievements();
 
+    this.save();
+  }
+
+  recordScaleSession(data) {
+    const today = new Date().toISOString().split('T')[0];
+    this.data.scaleStats.totalSessions++;
+    this.data.scaleStats.totalScales++;
+    this.data.scaleStats.totalScaleNotes += data.totalNotes;
+    this.data.scaleStats.totalScaleCorrect += data.correctNotes;
+
+    if (!this.data.scaleStats.byScaleType[data.scaleType]) {
+      this.data.scaleStats.byScaleType[data.scaleType] = { sessions: 0, totalAccuracy: 0 };
+    }
+    this.data.scaleStats.byScaleType[data.scaleType].sessions++;
+    this.data.scaleStats.byScaleType[data.scaleType].totalAccuracy += data.accuracy;
+
+    if (!this.data.scaleStats.byRootNote[data.rootNote]) {
+      this.data.scaleStats.byRootNote[data.rootNote] = { sessions: 0 };
+    }
+    this.data.scaleStats.byRootNote[data.rootNote].sessions++;
+
+    const maxBpm = Math.max.apply(null, data.bpmHistory);
+    this.data.scaleStats.bpmProgress.push({ date: new Date().toISOString(), bpm: maxBpm, scaleType: data.scaleType });
+
+    this.data.scaleHistory.unshift({
+      date: new Date().toISOString(), scaleType: data.scaleType, rootNote: data.rootNote,
+      mode: data.mode, bpm: data.bpm, accuracy: data.accuracy,
+      totalNotes: data.totalNotes, duration: data.duration
+    });
+    if (this.data.scaleHistory.length > 50) this.data.scaleHistory.pop();
+
+    if (!this.data.dailyRecords[today]) this.data.dailyRecords[today] = { count: 0, correct: 0, time: 0 };
+    this.data.dailyRecords[today].count += data.totalNotes;
+    this.data.dailyRecords[today].correct += data.correctNotes;
+    this.data.dailyRecords[today].time += data.duration;
+
+    // Update streak
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    if (this.data.lastPracticeDate === yesterday || this.data.lastPracticeDate === today) {
+      if (this.data.lastPracticeDate !== today) this.data.streak++;
+    } else {
+      this.data.streak = 1;
+    }
+    this.data.lastPracticeDate = today;
+    if (this.data.streak > this.data.bestStreak) this.data.bestStreak = this.data.streak;
+
+    this.checkAchievements();
     this.save();
   }
 

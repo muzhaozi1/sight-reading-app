@@ -10,6 +10,7 @@ class App {
     this.selectedDifficulty = 1;
     this.selectedClef = 'treble';
     this._planConfigs = [];
+    this.scalePractice = null;
     this._bound = false;
 
     // Load saved settings
@@ -96,6 +97,7 @@ class App {
         case 'stats': this.renderStats(); break;
         case 'plan': this.renderPlan(); break;
         case 'achievements': this.renderAchievements(); break;
+        case 'scale': this.renderScalePage(); break;
       }
     } catch(e) {
       console.error('Render error:', page, e);
@@ -1103,6 +1105,14 @@ class App {
         '<div class="progress-bar" style="margin-bottom:24px;height:8px"><div class="progress-bar-fill" style="width:' + (unlocked/achievements.length*100) + '%"></div></div>' +
         '<div class="grid grid-3">' + achHTML + '</div>' +
       '</div>';
+  }
+
+  // ===== SCALE PRACTICE PAGE =====
+  renderScalePage() {
+    if (!this.scalePractice) {
+      this.scalePractice = new ScalePractice(this);
+    }
+    this.scalePractice.renderSetup();
   }
 }
 
