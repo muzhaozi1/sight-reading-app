@@ -1156,6 +1156,7 @@ body::after {
   padding: 8px 0;
   display: flex;
   justify-content: center;
+  align-items: center;
   -webkit-overflow-scrolling: touch;
 }
 .piano {
@@ -1163,6 +1164,7 @@ body::after {
   height: 90px;
   user-select: none;
   flex-shrink: 0;
+  margin: 0 auto;
 }
 .piano .white-key {
   width: 32px;

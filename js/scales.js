@@ -851,7 +851,12 @@ var ScalePractice = (function() {
     // Stop current practice and start a new one
     if (this._countInMetro) { this._countInMetro.stop(); this._countInMetro = null; }
     if (this.metronome) { this.metronome.stop(); this.metronome = null; }
-    if (this.sessionStats.startTime > 0) this._recordSession();
+    try { if (this.sessionStats.startTime > 0) this._recordSession(); } catch(e) { console.warn('recordSession error:', e); }
+    // Reset state and start fresh
+    this.state = 'SETUP';
+    this.currentIndex = -1;
+    this.currentNotes = [];
+    this.answerStates = [];
     this.start();
   };
 
@@ -956,6 +961,7 @@ var ScalePractice = (function() {
     var keyWidth = 36;
     var totalWidth = whiteKeys.length * keyWidth;
     container.style.width = totalWidth + 'px';
+    container.style.margin = '0 auto';
     container.innerHTML = '';
 
     // Render white keys
