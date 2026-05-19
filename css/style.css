@@ -824,6 +824,183 @@ body::after {
   100% { transform: translateY(-200px); }
 }
 
+/* ========== SVG Score Animations ========== */
+.note-appear {
+  animation: noteAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes noteAppear {
+  0% { opacity: 0; transform: translateY(15px) scale(0.7); }
+  60% { opacity: 1; transform: translateY(-3px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.score-pulse {
+  animation: scorePulse 2s ease-in-out infinite;
+}
+@keyframes scorePulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+.result-indicator {
+  animation: resultPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes resultPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.score-display.state-correct {
+  border-color: rgba(74, 222, 128, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 30px rgba(74, 222, 128, 0.1);
+}
+.score-display.state-wrong {
+  border-color: rgba(248, 113, 113, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 30px rgba(248, 113, 113, 0.1);
+  animation: scoreShake 0.4s ease;
+}
+@keyframes scoreShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+/* ========== Improved Page Transitions ========== */
+.page { display: none; }
+.page.active { display: block; animation: pageEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== Answer Button Ripple ========== */
+.answer-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.2), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.answer-btn:active::after { opacity: 1; }
+
+/* ========== Improved Combo Flash ========== */
+.combo-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 900;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 999;
+  background: linear-gradient(135deg, var(--pink), var(--warning), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(244,114,182,0.4));
+  letter-spacing: 3px;
+}
+.combo-flash.show { animation: comboFlash 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes comboFlash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-5deg); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(2deg); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4) rotate(-2deg); }
+}
+
+/* ========== Particle burst on correct answer ========== */
+.particle-burst {
+  position: fixed;
+  pointer-events: none;
+  z-index: 998;
+}
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: particleFly 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes particleFly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px), var(--py)) scale(0); }
+}
+
+/* ========== Theme Switcher ========== */
+.theme-switcher {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.theme-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+}
+.theme-dot:hover { transform: scale(1.2); }
+.theme-dot.active { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+.theme-dot.dark { background: linear-gradient(135deg, #0a0a14, #1a1a2e); }
+.theme-dot.midnight { background: linear-gradient(135deg, #0d1117, #161b22); }
+.theme-dot.purple { background: linear-gradient(135deg, #1a0a2e, #2d1b4e); }
+
+/* ========== Sidebar Overlay ========== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ========== Improved Responsive ========== */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); width: 260px; }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
+  .main-content { margin-left: 0; padding: 16px; padding-top: 56px; }
+  .mobile-menu-btn { display: flex; }
+  .answer-options { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .answer-btn { padding: 12px 6px; font-size: 1rem; }
+  .results-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .score-display { padding: 20px 16px; min-height: 140px; }
+  .practice-bar { font-size: 0.78rem; padding: 8px 12px; }
+  .practice-hint-bar { flex-wrap: wrap; gap: 10px; padding: 8px 12px; }
+  .mode-cards { grid-template-columns: 1fr 1fr; }
+  .difficulty-cards { flex-wrap: wrap; }
+  .diff-card { min-width: 80px; padding: 10px; }
+  .page-title { font-size: 1.2rem; }
+  .stat-card { padding: 14px; }
+  .stat-card .stat-number { font-size: 1.4rem; }
+  .plan-item { padding: 12px; gap: 10px; }
+  .card { padding: 16px; }
+}
+
+@media (max-width: 480px) {
+  .answer-options { grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .answer-btn { padding: 10px 4px; font-size: 0.95rem; }
+  .results-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .result-stat .result-stat-value { font-size: 1.2rem; }
+  .combo-flash { font-size: 1.8rem; }
+  .mode-cards { grid-template-columns: 1fr; }
+  .stat-card .stat-number { font-size: 1.2rem; }
+}
+
 /* Sidebar glow line */
 .sidebar::after {
   content: '';

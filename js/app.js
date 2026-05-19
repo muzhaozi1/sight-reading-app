@@ -27,6 +27,11 @@ class App {
     this.bindEvents();
     this.showPage('home');
     audio.enabled = this.settings.sound;
+    // Load saved theme
+    try {
+      var savedTheme = localStorage.getItem('sr_theme');
+      if (savedTheme) this.setTheme(savedTheme);
+    } catch(e) {}
   }
 
   // ===== Event Binding (delegation) =====
@@ -42,8 +47,24 @@ class App {
 
     // Mobile menu
     var menuBtn = document.getElementById('mobileMenuBtn');
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
     if (menuBtn) menuBtn.addEventListener('click', function() {
-      document.querySelector('.sidebar').classList.toggle('open');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+    if (overlay) overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+    // Close sidebar on nav item click (mobile)
+    document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+      el.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('active');
+        }
+      });
     });
 
     // Click handling uses inline onclick on buttons
@@ -259,6 +280,22 @@ class App {
     el.classList.toggle('active');
     if (key === 'sound') audio.enabled = this.settings.sound;
     this.saveSettings();
+  }
+
+  setTheme(theme) {
+    var themes = {
+      dark: { bg: '#0a0a14', bg2: '#12121e', bg3: '#1a1a2e' },
+      midnight: { bg: '#0d1117', bg2: '#161b22', bg3: '#21262d' },
+      purple: { bg: '#0f0a1a', bg2: '#1a1228', bg3: '#251a38' }
+    };
+    var t = themes[theme] || themes.dark;
+    document.documentElement.style.setProperty('--bg', t.bg);
+    document.documentElement.style.setProperty('--bg2', t.bg2);
+    document.documentElement.style.setProperty('--bg3', t.bg3);
+    document.querySelectorAll('.theme-dot').forEach(function(d) { d.classList.remove('active'); });
+    var dot = document.querySelector('.theme-dot.' + theme);
+    if (dot) dot.classList.add('active');
+    try { localStorage.setItem('sr_theme', theme); } catch(e) {}
   }
 
   togglePracticeHint(type) {
@@ -592,6 +629,13 @@ class App {
     ps.responseTimes.push(responseTime);
     ps.results.push({ note: ps.currentNote, answer: answer, correct: correct, time: responseTime });
 
+    // Score display state
+    var scoreDisplay = document.getElementById('scoreDisplay');
+    if (scoreDisplay) {
+      scoreDisplay.classList.remove('state-correct', 'state-wrong');
+      scoreDisplay.classList.add(correct ? 'state-correct' : 'state-wrong');
+    }
+
     if (correct) {
       ps.correct++;
       ps.combo++;
@@ -600,6 +644,9 @@ class App {
 
       var btn = document.querySelector('.answer-btn[data-note="' + answer + '"]');
       if (btn) btn.classList.add('correct');
+
+      // Particle burst on correct answer
+      this._spawnParticles(btn);
 
       if (ps.combo > 0 && ps.combo % 10 === 0) {
         audio.playCombo(ps.combo);
@@ -618,8 +665,8 @@ class App {
     this.updatePracticeBar();
     document.querySelectorAll('.answer-btn').forEach(function(b) { b.disabled = true; });
 
-    // Show note on staff after answering (especially for listen mode)
-    this.renderer.renderNote(ps.currentNote);
+    // Highlight note on staff with correct/wrong state
+    this.renderer.highlightResult(correct);
 
     // Show solfège AFTER answering
     if (this.settings.showSolfege) {
@@ -634,12 +681,38 @@ class App {
 
     var self = this;
     setTimeout(function() {
+      // Clean up score display state
+      if (scoreDisplay) scoreDisplay.classList.remove('state-correct', 'state-wrong');
       if (ps.mode === 'sprint' && ps.sprintRemaining <= 0) {
         self.endPractice();
       } else {
         self.nextQuestion();
       }
     }, correct ? 600 : 1200);
+  }
+
+  _spawnParticles(btn) {
+    if (!btn) return;
+    var rect = btn.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var burst = document.createElement('div');
+    burst.className = 'particle-burst';
+    burst.style.left = cx + 'px';
+    burst.style.top = cy + 'px';
+    var colors = ['#4ade80', '#22d3ee', '#fbbf24', '#a78bfa', '#f472b6'];
+    for (var i = 0; i < 8; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var angle = (Math.PI * 2 / 8) * i;
+      var dist = 30 + Math.random() * 30;
+      p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+      p.style.background = colors[i % colors.length];
+      burst.appendChild(p);
+    }
+    document.body.appendChild(burst);
+    setTimeout(function() { burst.remove(); }, 700);
   }
 
   startQuestionTimer() {

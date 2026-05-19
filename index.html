@@ -689,26 +689,6 @@ input, select { font-family: inherit; outline: none; }
 /* ========== Charts ========== */
 .chart-container { width: 100%; height: 250px; position: relative; }
 
-/* ========== Combo Flash ========== */
-.combo-flash {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2.5rem;
-  font-weight: 900;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 999;
-  text-shadow: 0 0 30px var(--pink), 0 0 60px rgba(244,114,182,0.3);
-  letter-spacing: 2px;
-}
-.combo-flash.show { animation: comboFlash 0.6s ease-out; }
-@keyframes comboFlash {
-  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
-}
 
 /* Speed Badge */
 .speed-badge {
@@ -723,10 +703,6 @@ input, select { font-family: inherit; outline: none; }
 }
 .speed-badge.lightning { background: var(--warning); color: #000; }
 .speed-badge.instant { background: var(--pink); color: #fff; }
-
-/* ========== Pages ========== */
-.page { display: none; }
-.page.active { display: block; animation: fadeIn 0.3s ease; }
 
 /* ========== Animations ========== */
 .fade-in { animation: fadeIn 0.3s ease; }
@@ -759,7 +735,7 @@ input, select { font-family: inherit; outline: none; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
 
-/* ========== Mobile ========== */
+/* ========== Mobile Menu Button ========== */
 .mobile-menu-btn {
   display: none;
   position: fixed;
@@ -775,15 +751,24 @@ input, select { font-family: inherit; outline: none; }
   font-size: 1.2rem;
   align-items: center;
   justify-content: center;
+  transition: var(--transition);
 }
-@media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
-  .main-content { margin-left: 0; padding: 16px; }
-  .mobile-menu-btn { display: flex; }
-  .answer-options { grid-template-columns: repeat(4, 1fr); }
-  .results-grid { grid-template-columns: repeat(2, 1fr); }
-  .grid-4 { grid-template-columns: 1fr 1fr; }
+.mobile-menu-btn:hover { background: var(--bg3); border-color: var(--primary); }
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
 }
 
 /* ========== Background Ambient Effect ========== */
@@ -831,6 +816,168 @@ body::after {
   100% { transform: translateY(-200px); }
 }
 
+/* ========== SVG Score Animations ========== */
+.note-appear {
+  animation: noteAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes noteAppear {
+  0% { opacity: 0; transform: translateY(15px) scale(0.7); }
+  60% { opacity: 1; transform: translateY(-3px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.score-pulse {
+  animation: scorePulse 2s ease-in-out infinite;
+}
+@keyframes scorePulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+.result-indicator {
+  animation: resultPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes resultPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Score display states */
+.score-display.state-correct {
+  border-color: rgba(74, 222, 128, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 30px rgba(74, 222, 128, 0.1);
+}
+.score-display.state-wrong {
+  border-color: rgba(248, 113, 113, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 30px rgba(248, 113, 113, 0.1);
+  animation: scoreShake 0.4s ease;
+}
+@keyframes scoreShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+/* ========== Improved Page Transitions ========== */
+.page { display: none; }
+.page.active { display: block; animation: pageEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== Answer Button Ripple ========== */
+.answer-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.2), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.answer-btn:active::after { opacity: 1; }
+
+/* ========== Improved Combo Flash ========== */
+.combo-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 900;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 999;
+  background: linear-gradient(135deg, var(--pink), var(--warning), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(244,114,182,0.4));
+  letter-spacing: 3px;
+}
+.combo-flash.show { animation: comboFlash 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes comboFlash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-5deg); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(2deg); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4) rotate(-2deg); }
+}
+
+/* ========== Particle burst on correct answer ========== */
+.particle-burst {
+  position: fixed;
+  pointer-events: none;
+  z-index: 998;
+}
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: particleFly 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes particleFly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--px), var(--py)) scale(0); }
+}
+
+/* ========== Theme Switcher ========== */
+.theme-switcher {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.theme-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+}
+.theme-dot:hover { transform: scale(1.2); }
+.theme-dot.active { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+.theme-dot.dark { background: linear-gradient(135deg, #0a0a14, #1a1a2e); }
+.theme-dot.midnight { background: linear-gradient(135deg, #0d1117, #161b22); }
+.theme-dot.purple { background: linear-gradient(135deg, #1a0a2e, #2d1b4e); }
+
+/* ========== Improved Responsive ========== */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); width: 260px; }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
+  .main-content { margin-left: 0; padding: 16px; padding-top: 56px; }
+  .mobile-menu-btn { display: flex; }
+  .answer-options { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .answer-btn { padding: 12px 6px; font-size: 1rem; }
+  .results-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .score-display { padding: 20px 16px; min-height: 140px; }
+  .practice-bar { font-size: 0.78rem; padding: 8px 12px; }
+  .practice-hint-bar { flex-wrap: wrap; gap: 10px; padding: 8px 12px; }
+  .mode-cards { grid-template-columns: 1fr 1fr; }
+  .difficulty-cards { flex-wrap: wrap; }
+  .diff-card { min-width: 80px; padding: 10px; }
+  .page-title { font-size: 1.2rem; }
+  .stat-card { padding: 14px; }
+  .stat-card .stat-number { font-size: 1.4rem; }
+  .plan-item { padding: 12px; gap: 10px; }
+  .card { padding: 16px; }
+}
+
+@media (max-width: 480px) {
+  .answer-options { grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .answer-btn { padding: 10px 4px; font-size: 0.95rem; }
+  .results-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .result-stat .result-stat-value { font-size: 1.2rem; }
+  .combo-flash { font-size: 1.8rem; }
+  .mode-cards { grid-template-columns: 1fr; }
+  .stat-card .stat-number { font-size: 1.2rem; }
+}
+
 /* Sidebar glow line */
 .sidebar::after {
   content: '';
@@ -848,6 +995,8 @@ body::after {
   <div class="app-container">
     <!-- Mobile Menu Button -->
     <button class="btn btn-icon mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -880,8 +1029,16 @@ body::after {
           <span>成就系统</span>
         </div>
       </nav>
-      <div style="padding:12px;font-size:0.7rem;color:var(--text3);text-align:center;border-top:1px solid var(--border)">
-        快捷键: 1-7 或 C D E F G A B
+      <div style="padding:12px;border-top:1px solid var(--border)">
+        <div style="font-size:0.68rem;color:var(--text3);text-align:center;margin-bottom:8px">主题</div>
+        <div class="theme-switcher" style="justify-content:center">
+          <div class="theme-dot dark active" onclick="app.setTheme('dark')" title="深空"></div>
+          <div class="theme-dot midnight" onclick="app.setTheme('midnight')" title="午夜"></div>
+          <div class="theme-dot purple" onclick="app.setTheme('purple')" title="紫罗兰"></div>
+        </div>
+        <div style="font-size:0.65rem;color:var(--text3);text-align:center;margin-top:8px">
+          快捷键: 1-7 或 C D E F G A B
+        </div>
       </div>
     </aside>
 
@@ -1920,7 +2077,7 @@ class PlanGenerator {
 
 const planGenerator = new PlanGenerator(stats);
 </script><script>
-// ========== Score Renderer (Pure SVG, no dependencies) ==========
+// ========== Score Renderer (Pure SVG, Enhanced) ==========
 
 class ScoreRenderer {
   constructor(containerId) {
@@ -1928,6 +2085,7 @@ class ScoreRenderer {
     this.currentNote = null;
     this.width = 420;
     this.height = 180;
+    this._animId = 0;
   }
 
   init(width, height) {
@@ -1936,92 +2094,130 @@ class ScoreRenderer {
     this.container.innerHTML = '';
   }
 
-  // Note name+octave → staff position
-  // Both clefs use same y range: top line y=60(pos=10), bottom line y=108(pos=2)
-  // Treble: F5=10(top), E4=2(bottom), C4=0(middle C below)
-  // Bass:   A3=10(top), G2=2(bottom)
   noteToPosition(note) {
     var noteOrder = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
     var base = noteOrder[note.name] || 0;
     var octaveOffset = (note.octave - 4) * 7;
     var pos = base + octaveOffset;
-    if (note.clef === 'bass') pos += 12; // G2=2(1st line), A3=10(top line)
+    if (note.clef === 'bass') pos += 12;
     return pos;
   }
 
-  // Position → y coordinate on staff
   positionToY(pos) {
-    // Staff lines for treble: E4(2), G4(4), B4(6), D5(8), F5(10) → y positions
-    // Middle C (pos=0) is below the staff on treble
-    // Each step = 6px (half a line spacing)
-    var staffTop = 60;      // y of the top line (line 5)
-    var lineSpacing = 12;   // pixels between lines
-    var topLinePos = 10;    // F5 is at position 10 (top line of treble staff)
-    var y = staffTop + (topLinePos - pos) * (lineSpacing / 2);
-    return y;
+    var staffTop = 60;
+    var lineSpacing = 12;
+    var topLinePos = 10;
+    return staffTop + (topLinePos - pos) * (lineSpacing / 2);
+  }
+
+  _svgDefs() {
+    return '<defs>' +
+      '<linearGradient id="noteGrad" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0%" stop-color="#f0f0ff"/>' +
+        '<stop offset="100%" stop-color="#c8c8e0"/>' +
+      '</linearGradient>' +
+      '<filter id="glowCorrect" x="-50%" y="-50%" width="200%" height="200%">' +
+        '<feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>' +
+        '<feFlood flood-color="#4ade80" flood-opacity="0.6"/>' +
+        '<feComposite in2="blur" operator="in"/>' +
+        '<feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>' +
+      '</filter>' +
+      '<filter id="glowWrong" x="-50%" y="-50%" width="200%" height="200%">' +
+        '<feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>' +
+        '<feFlood flood-color="#f87171" flood-opacity="0.6"/>' +
+        '<feComposite in2="blur" operator="in"/>' +
+        '<feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>' +
+      '</filter>' +
+      '<filter id="noteShadow" x="-20%" y="-20%" width="140%" height="140%">' +
+        '<feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>' +
+      '</filter>' +
+      '<linearGradient id="staffLineGrad" x1="0" y1="0" x2="1" y2="0">' +
+        '<stop offset="0%" stop-color="#8888aa" stop-opacity="0.3"/>' +
+        '<stop offset="10%" stop-color="#8888aa" stop-opacity="1"/>' +
+        '<stop offset="90%" stop-color="#8888aa" stop-opacity="1"/>' +
+        '<stop offset="100%" stop-color="#8888aa" stop-opacity="0.3"/>' +
+      '</linearGradient>' +
+    '</defs>';
   }
 
   renderEmptyStaff(clef) {
     var w = this.width;
     var h = this.height;
     var clefSymbol = clef === 'treble' ? '𝄞' : '𝄢';
-
-    var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
-    svg += '<rect width="' + w + '" height="' + h + '" fill="transparent"/>';
-
     var staffLeft = 60;
     var staffRight = w - 30;
     var staffTop = 60;
     var lineSpacing = 12;
+
+    var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += this._svgDefs();
+    svg += '<rect width="' + w + '" height="' + h + '" fill="transparent"/>';
+
     for (var i = 0; i < 5; i++) {
       var ly = staffTop + i * lineSpacing;
-      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="url(#staffLineGrad)" stroke-width="1.5"/>';
     }
 
     var clefY = clef === 'treble' ? (staffTop + 42) : (staffTop + 36);
-    svg += '<text x="' + (staffLeft + 5) + '" y="' + clefY + '" font-size="48" fill="#aaa" font-family="serif">' + clefSymbol + '</text>';
+    svg += '<text x="' + (staffLeft + 5) + '" y="' + clefY + '" font-size="48" fill="#aaa" font-family="serif" opacity="0.8">' + clefSymbol + '</text>';
 
-    // Question mark in the center
-    svg += '<text x="' + (w / 2 + 20) + '" y="' + (staffTop + 40) + '" text-anchor="middle" font-size="32" fill="#555570" font-weight="bold">?</text>';
+    svg += '<g class="score-pulse">' +
+      '<text x="' + (w / 2 + 20) + '" y="' + (staffTop + 44) + '" text-anchor="middle" font-size="36" fill="#555570" font-weight="bold" opacity="0.6">?</text>' +
+    '</g>';
 
-    svg += '<text x="' + (staffRight - 4) + '" y="' + (h - 10) + '" text-anchor="end" font-size="11" fill="#666680">' + (clef === 'treble' ? '高音谱' : '低音谱') + '</text>';
+    svg += '<text x="' + (staffRight - 4) + '" y="' + (h - 10) + '" text-anchor="end" font-size="11" fill="#666680" font-style="italic">' +
+      (clef === 'treble' ? '高音谱号' : '低音谱号') + '</text>';
     svg += '</svg>';
 
     this.container.innerHTML = svg;
   }
 
-  renderNote(note) {
+  renderNote(note, state) {
     this.currentNote = note;
+    this._animId++;
     var w = this.width;
     var h = this.height;
     var pos = this.noteToPosition(note);
     var noteY = this.positionToY(pos);
     var clefSymbol = note.clef === 'treble' ? '𝄞' : '𝄢';
     var acc = note.accidental || '';
-    var noteColor = '#e8e8f0'; // Neutral color, no hint
 
-    // Build SVG
-    var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
-    svg += '<rect width="' + w + '" height="' + h + '" fill="transparent"/>';
+    var noteColor = '#e8e8f0';
+    var noteFill = 'url(#noteGrad)';
+    var filter = 'url(#noteShadow)';
 
-    // Staff lines (5 lines)
+    if (state === 'correct') {
+      noteColor = '#4ade80';
+      noteFill = '#4ade80';
+      filter = 'url(#glowCorrect)';
+    } else if (state === 'wrong') {
+      noteColor = '#f87171';
+      noteFill = '#f87171';
+      filter = 'url(#glowWrong)';
+    }
+
     var staffLeft = 60;
     var staffRight = w - 30;
     var staffTop = 60;
     var lineSpacing = 12;
-    for (var i = 0; i < 5; i++) {
-      var ly = staffTop + i * lineSpacing;
-      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
-    }
-
-    // Clef symbol — position differs for treble vs bass
-    var clefY = note.clef === 'treble' ? (staffTop + 42) : (staffTop + 36);
-    svg += '<text x="' + (staffLeft + 5) + '" y="' + clefY + '" font-size="48" fill="#aaa" font-family="serif">' + clefSymbol + '</text>';
-
-    // Ledger lines if needed
-    var staffBottom = staffTop + 4 * lineSpacing;
     var noteX = w / 2 + 20;
 
+    var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += this._svgDefs();
+    svg += '<rect width="' + w + '" height="' + h + '" fill="transparent"/>';
+
+    for (var i = 0; i < 5; i++) {
+      var ly = staffTop + i * lineSpacing;
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="url(#staffLineGrad)" stroke-width="1.5"/>';
+    }
+
+    var clefY = note.clef === 'treble' ? (staffTop + 42) : (staffTop + 36);
+    svg += '<text x="' + (staffLeft + 5) + '" y="' + clefY + '" font-size="48" fill="#aaa" font-family="serif" opacity="0.8">' + clefSymbol + '</text>';
+
+    svg += '<text x="' + (staffLeft + 55) + '" y="' + (staffTop + 20) + '" font-size="20" fill="#8888aa" font-weight="bold" font-family="serif">4</text>';
+    svg += '<text x="' + (staffLeft + 55) + '" y="' + (staffTop + 44) + '" font-size="20" fill="#8888aa" font-weight="bold" font-family="serif">4</text>';
+
+    var staffBottom = staffTop + 4 * lineSpacing;
     if (noteY > staffBottom) {
       for (var ly = staffBottom + lineSpacing; ly <= noteY + 2; ly += lineSpacing) {
         svg += '<line x1="' + (noteX - 16) + '" y1="' + ly + '" x2="' + (noteX + 16) + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
@@ -2033,28 +2229,57 @@ class ScoreRenderer {
       }
     }
 
-    // Note head (neutral white fill)
-    svg += '<ellipse cx="' + noteX + '" cy="' + noteY + '" rx="9" ry="7" fill="' + noteColor + '" stroke="' + noteColor + '" stroke-width="1.5" transform="rotate(-15,' + noteX + ',' + noteY + ')"/>';
+    var animClass = state ? '' : 'note-appear';
+    svg += '<g class="' + animClass + '" filter="' + filter + '">';
 
-    // Stem
+    svg += '<ellipse cx="' + noteX + '" cy="' + noteY + '" rx="10" ry="7.5" fill="' + noteFill + '" stroke="' + noteColor + '" stroke-width="1.2" transform="rotate(-15,' + noteX + ',' + noteY + ')"/>';
+
+    if (!state) {
+      svg += '<ellipse cx="' + (noteX - 2) + '" cy="' + (noteY - 2) + '" rx="4" ry="3" fill="rgba(255,255,255,0.15)" transform="rotate(-15,' + noteX + ',' + noteY + ')"/>';
+    }
+
     var stemUp = noteY > (staffTop + 2 * lineSpacing);
     if (stemUp) {
-      svg += '<line x1="' + (noteX + 8) + '" y1="' + noteY + '" x2="' + (noteX + 8) + '" y2="' + (noteY - 40) + '" stroke="' + noteColor + '" stroke-width="1.5"/>';
+      svg += '<line x1="' + (noteX + 9) + '" y1="' + (noteY - 1) + '" x2="' + (noteX + 9) + '" y2="' + (noteY - 42) + '" stroke="' + noteColor + '" stroke-width="1.8" stroke-linecap="round"/>';
     } else {
-      svg += '<line x1="' + (noteX - 8) + '" y1="' + noteY + '" x2="' + (noteX - 8) + '" y2="' + (noteY + 40) + '" stroke="' + noteColor + '" stroke-width="1.5"/>';
+      svg += '<line x1="' + (noteX - 9) + '" y1="' + (noteY + 1) + '" x2="' + (noteX - 9) + '" y2="' + (noteY + 42) + '" stroke="' + noteColor + '" stroke-width="1.8" stroke-linecap="round"/>';
     }
 
-    // Accidental symbol (no note name)
+    if (stemUp) {
+      svg += '<path d="M' + (noteX + 9) + ',' + (noteY - 42) + ' q8,8 2,18" fill="none" stroke="' + noteColor + '" stroke-width="1.5" stroke-linecap="round"/>';
+    } else {
+      svg += '<path d="M' + (noteX - 9) + ',' + (noteY + 42) + ' q-8,-8 -2,-18" fill="none" stroke="' + noteColor + '" stroke-width="1.5" stroke-linecap="round"/>';
+    }
+
     if (acc) {
       var accSymbol = acc === '#' ? '♯' : '♭';
-      svg += '<text x="' + (noteX - 26) + '" y="' + (noteY + 6) + '" font-size="18" fill="' + noteColor + '" font-weight="bold">' + accSymbol + '</text>';
+      svg += '<text x="' + (noteX - 28) + '" y="' + (noteY + 7) + '" font-size="20" fill="' + noteColor + '" font-weight="bold" font-family="serif">' + accSymbol + '</text>';
     }
 
-    // Clef label only
-    svg += '<text x="' + (staffRight - 4) + '" y="' + (h - 10) + '" text-anchor="end" font-size="11" fill="#666680">' + (note.clef === 'treble' ? '高音谱' : '低音谱') + '</text>';
+    svg += '</g>';
+
+    if (state === 'correct') {
+      svg += '<g class="result-indicator">' +
+        '<circle cx="' + noteX + '" cy="' + noteY + '" r="20" fill="none" stroke="#4ade80" stroke-width="2" opacity="0.5"/>' +
+        '<text x="' + (noteX + 28) + '" y="' + (noteY + 5) + '" font-size="16" fill="#4ade80" font-weight="bold">✓</text>' +
+      '</g>';
+    } else if (state === 'wrong') {
+      svg += '<g class="result-indicator">' +
+        '<circle cx="' + noteX + '" cy="' + noteY + '" r="20" fill="none" stroke="#f87171" stroke-width="2" opacity="0.5"/>' +
+        '<text x="' + (noteX + 28) + '" y="' + (noteY + 5) + '" font-size="16" fill="#f87171" font-weight="bold">✗</text>' +
+      '</g>';
+    }
+
+    svg += '<text x="' + (staffRight - 4) + '" y="' + (h - 10) + '" text-anchor="end" font-size="11" fill="#666680" font-style="italic">' +
+      (note.clef === 'treble' ? '高音谱号' : '低音谱号') + '</text>';
 
     svg += '</svg>';
     this.container.innerHTML = svg;
+  }
+
+  highlightResult(correct) {
+    if (!this.currentNote) return;
+    this.renderNote(this.currentNote, correct ? 'correct' : 'wrong');
   }
 
   clear() {
@@ -2091,6 +2316,11 @@ class App {
     this.bindEvents();
     this.showPage('home');
     audio.enabled = this.settings.sound;
+    // Load saved theme
+    try {
+      var savedTheme = localStorage.getItem('sr_theme');
+      if (savedTheme) this.setTheme(savedTheme);
+    } catch(e) {}
   }
 
   // ===== Event Binding (delegation) =====
@@ -2106,8 +2336,24 @@ class App {
 
     // Mobile menu
     var menuBtn = document.getElementById('mobileMenuBtn');
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
     if (menuBtn) menuBtn.addEventListener('click', function() {
-      document.querySelector('.sidebar').classList.toggle('open');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+    if (overlay) overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+    // Close sidebar on nav item click (mobile)
+    document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+      el.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('active');
+        }
+      });
     });
 
     // Click handling uses inline onclick on buttons
@@ -2323,6 +2569,22 @@ class App {
     el.classList.toggle('active');
     if (key === 'sound') audio.enabled = this.settings.sound;
     this.saveSettings();
+  }
+
+  setTheme(theme) {
+    var themes = {
+      dark: { bg: '#0a0a14', bg2: '#12121e', bg3: '#1a1a2e' },
+      midnight: { bg: '#0d1117', bg2: '#161b22', bg3: '#21262d' },
+      purple: { bg: '#0f0a1a', bg2: '#1a1228', bg3: '#251a38' }
+    };
+    var t = themes[theme] || themes.dark;
+    document.documentElement.style.setProperty('--bg', t.bg);
+    document.documentElement.style.setProperty('--bg2', t.bg2);
+    document.documentElement.style.setProperty('--bg3', t.bg3);
+    document.querySelectorAll('.theme-dot').forEach(function(d) { d.classList.remove('active'); });
+    var dot = document.querySelector('.theme-dot.' + theme);
+    if (dot) dot.classList.add('active');
+    try { localStorage.setItem('sr_theme', theme); } catch(e) {}
   }
 
   togglePracticeHint(type) {
@@ -2656,6 +2918,13 @@ class App {
     ps.responseTimes.push(responseTime);
     ps.results.push({ note: ps.currentNote, answer: answer, correct: correct, time: responseTime });
 
+    // Score display state
+    var scoreDisplay = document.getElementById('scoreDisplay');
+    if (scoreDisplay) {
+      scoreDisplay.classList.remove('state-correct', 'state-wrong');
+      scoreDisplay.classList.add(correct ? 'state-correct' : 'state-wrong');
+    }
+
     if (correct) {
       ps.correct++;
       ps.combo++;
@@ -2664,6 +2933,9 @@ class App {
 
       var btn = document.querySelector('.answer-btn[data-note="' + answer + '"]');
       if (btn) btn.classList.add('correct');
+
+      // Particle burst on correct answer
+      this._spawnParticles(btn);
 
       if (ps.combo > 0 && ps.combo % 10 === 0) {
         audio.playCombo(ps.combo);
@@ -2682,8 +2954,8 @@ class App {
     this.updatePracticeBar();
     document.querySelectorAll('.answer-btn').forEach(function(b) { b.disabled = true; });
 
-    // Show note on staff after answering (especially for listen mode)
-    this.renderer.renderNote(ps.currentNote);
+    // Highlight note on staff with correct/wrong state
+    this.renderer.highlightResult(correct);
 
     // Show solfège AFTER answering
     if (this.settings.showSolfege) {
@@ -2698,12 +2970,38 @@ class App {
 
     var self = this;
     setTimeout(function() {
+      // Clean up score display state
+      if (scoreDisplay) scoreDisplay.classList.remove('state-correct', 'state-wrong');
       if (ps.mode === 'sprint' && ps.sprintRemaining <= 0) {
         self.endPractice();
       } else {
         self.nextQuestion();
       }
     }, correct ? 600 : 1200);
+  }
+
+  _spawnParticles(btn) {
+    if (!btn) return;
+    var rect = btn.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var burst = document.createElement('div');
+    burst.className = 'particle-burst';
+    burst.style.left = cx + 'px';
+    burst.style.top = cy + 'px';
+    var colors = ['#4ade80', '#22d3ee', '#fbbf24', '#a78bfa', '#f472b6'];
+    for (var i = 0; i < 8; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var angle = (Math.PI * 2 / 8) * i;
+      var dist = 30 + Math.random() * 30;
+      p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+      p.style.background = colors[i % colors.length];
+      burst.appendChild(p);
+    }
+    document.body.appendChild(burst);
+    setTimeout(function() { burst.remove(); }, 700);
   }
 
   startQuestionTimer() {
