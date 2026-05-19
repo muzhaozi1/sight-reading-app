@@ -1115,6 +1115,92 @@ body::after {
   text-align: center;
 }
 
+/* ========== Follow Mode Hint ========== */
+.follow-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cyan);
+  padding: 6px 0;
+  animation: scorePulse 2s ease-in-out infinite;
+}
+
+/* ========== Piano Keyboard — Larger, Scrollable ========== */
+.piano-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+  -webkit-overflow-scrolling: touch;
+}
+.piano {
+  position: relative;
+  height: 90px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.piano .white-key {
+  width: 32px;
+  height: 90px;
+}
+.piano .black-key {
+  width: 20px;
+  height: 56px;
+}
+
+/* ========== Mobile Landscape ========== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .main-content { padding: 8px 12px; }
+  .page-header { margin-bottom: 12px; }
+  .page-title { font-size: 1rem; }
+  .page-desc { display: none; }
+
+  .practice-bar { padding: 4px 10px; font-size: 0.72rem; gap: 8px; }
+  .practice-bar .stat-value { font-size: 0.85rem; }
+
+  .beat-indicator { padding: 4px 0; gap: 6px; }
+  .bi-dot { width: 10px; height: 10px; }
+
+  .score-display {
+    padding: 8px 12px;
+    min-height: 120px;
+  }
+
+  .piano-container { padding: 4px 0; }
+  .piano { height: 70px; }
+  .piano .white-key { width: 28px; height: 70px; }
+  .piano .black-key { width: 18px; height: 44px; }
+  .piano .white-key .key-label { font-size: 0.5rem; bottom: 3px; }
+
+  .follow-hint { font-size: 0.75rem; padding: 3px 0; }
+
+  .answer-options { gap: 4px; }
+  .answer-btn { padding: 8px 4px; font-size: 0.85rem; }
+
+  .card { padding: 10px 14px; margin-bottom: 8px; }
+  .setting-row { padding: 6px 0; }
+
+  .grid-2 { gap: 8px; }
+
+  .btn-lg { padding: 8px 20px; font-size: 0.85rem; }
+
+  .results-panel { padding: 12px 10px; }
+  .result-icon { font-size: 2rem; margin-bottom: 6px; }
+  .result-title { font-size: 1rem; margin-bottom: 4px; }
+  .results-grid { gap: 8px; margin-bottom: 12px; }
+  .result-stat .result-stat-value { font-size: 1.2rem; }
+}
+
+/* Tablet landscape */
+@media (min-width: 768px) and (max-height: 600px) {
+  .score-display { min-height: 150px; padding: 10px 16px; }
+  .piano { height: 80px; }
+  .piano .white-key { width: 30px; height: 80px; }
+  .piano .black-key { width: 19px; height: 50px; }
+}
+
 /* Sidebar glow line */
 .sidebar::after {
   content: '';
@@ -2261,41 +2347,28 @@ const planGenerator = new PlanGenerator(stats);
 
 // === Scale Type Definitions (intervals in semitones from root) ===
 var SCALE_TYPES = {
-  major:           { name: '大调',     intervals: [0,2,4,5,7,9,11], icon: '🎼', group: '基础' },
-  natural_minor:   { name: '自然小调', intervals: [0,2,3,5,7,8,10], icon: '🌙', group: '基础' },
-  harmonic_minor:  { name: '和声小调', intervals: [0,2,3,5,7,8,11], icon: '🎻', group: '基础' },
-  melodic_minor:   { name: '旋律小调', intervals: [0,2,3,5,7,9,11], icon: '🎹', group: '基础' },
-  pentatonic_major:{ name: '大调五声', intervals: [0,2,4,7,9],      icon: '🎵', group: '基础' },
-  pentatonic_minor:{ name: '小调五声', intervals: [0,3,5,7,10],     icon: '🎶', group: '基础' },
-  blues:           { name: '布鲁斯',   intervals: [0,3,5,6,7,10],   icon: '🎷', group: '特殊' },
-  chromatic:       { name: '半音阶',   intervals: [0,1,2,3,4,5,6,7,8,9,10,11], icon: '🎹', group: '特殊' },
-  whole_tone:      { name: '全音阶',   intervals: [0,2,4,6,8,10],   icon: '✨', group: '特殊' },
-  diminished:      { name: '减音阶',   intervals: [0,2,3,5,6,8,9,11], icon: '💎', group: '特殊' },
-  ionian:     { name: 'Ionian',     intervals: [0,2,4,5,7,9,11],  icon: '☀️', group: '调式' },
-  dorian:     { name: 'Dorian',     intervals: [0,2,3,5,7,9,10],  icon: '🌿', group: '调式' },
-  phrygian:   { name: 'Phrygian',   intervals: [0,1,3,5,7,8,10],  icon: '🌊', group: '调式' },
-  lydian:     { name: 'Lydian',     intervals: [0,2,4,6,7,9,11],  icon: '☁️', group: '调式' },
-  mixolydian: { name: 'Mixolydian', intervals: [0,2,4,5,7,9,10],  icon: '⚡', group: '调式' },
-  aeolian:    { name: 'Aeolian',    intervals: [0,2,3,5,7,8,10],  icon: '🍂', group: '调式' },
-  locrian:    { name: 'Locrian',    intervals: [0,1,3,5,6,8,10],  icon: '🌑', group: '调式' },
-  major_triad:      { name: '大三和弦',     intervals: [0,4,7],       icon: '△', group: '和弦' },
-  minor_triad:      { name: '小三和弦',     intervals: [0,3,7],       icon: 'm', group: '和弦' },
-  diminished_triad: { name: '减三和弦',     intervals: [0,3,6],       icon: '°', group: '和弦' },
-  augmented_triad:  { name: '增三和弦',     intervals: [0,4,8],       icon: '+', group: '和弦' },
-  major7:           { name: '大七和弦',     intervals: [0,4,7,11],    icon: '△⁷', group: '和弦' },
-  minor7:           { name: '小七和弦',     intervals: [0,3,7,10],    icon: 'm⁷', group: '和弦' },
-  dom7:             { name: '属七和弦',     intervals: [0,4,7,10],    icon: '⁷', group: '和弦' },
-  dim7:             { name: '减七和弦',     intervals: [0,3,6,9],     icon: '°⁷', group: '和弦' },
-  half_dim7:        { name: '半减七和弦',   intervals: [0,3,6,10],    icon: 'ø⁷', group: '和弦' },
-  sus4:             { name: '挂四和弦',     intervals: [0,5,7],       icon: 'sus4', group: '和弦' },
-  sus2:             { name: '挂二和弦',     intervals: [0,2,7],       icon: 'sus2', group: '和弦' },
-  major_arp:        { name: '大调琶音',     intervals: [0,4,7,12],    icon: '🎼', group: '琶音' },
-  minor_arp:        { name: '小调琶音',     intervals: [0,3,7,12],    icon: '🎵', group: '琶音' },
-  dim_arp:          { name: '减琶音',       intervals: [0,3,6,12],    icon: '🔻', group: '琶音' },
-  aug_arp:          { name: '增琶音',       intervals: [0,4,8,12],    icon: '🔺', group: '琶音' },
-  major7_arp:       { name: '大七琶音',     intervals: [0,4,7,11,12], icon: '🎶', group: '琶音' },
-  minor7_arp:       { name: '小七琶音',     intervals: [0,3,7,10,12], icon: '♪', group: '琶音' },
-  dom7_arp:         { name: '属七琶音',     intervals: [0,4,7,10,12], icon: '♫', group: '琶音' }
+  major:           { name: '大调',     intervals: [0,2,4,5,7,9,11], icon: '🎼', group: '音阶' },
+  natural_minor:   { name: '自然小调', intervals: [0,2,3,5,7,8,10], icon: '🌙', group: '音阶' },
+  harmonic_minor:  { name: '和声小调', intervals: [0,2,3,5,7,8,11], icon: '🎻', group: '音阶' },
+  melodic_minor:   { name: '旋律小调', intervals: [0,2,3,5,7,9,11], icon: '🎹', group: '音阶' },
+  pentatonic_major:{ name: '大调五声', intervals: [0,2,4,7,9],      icon: '🎵', group: '音阶' },
+  pentatonic_minor:{ name: '小调五声', intervals: [0,3,5,7,10],     icon: '🎶', group: '音阶' },
+  blues:           { name: '布鲁斯',   intervals: [0,3,5,6,7,10],   icon: '🎷', group: '音阶' },
+  chromatic:       { name: '半音阶',   intervals: [0,1,2,3,4,5,6,7,8,9,10,11], icon: '🎹', group: '音阶' },
+  dorian:     { name: 'Dorian 小调',   intervals: [0,2,3,5,7,9,10],  icon: '🌿', group: '调式' },
+  mixolydian: { name: 'Mixolydian 属', intervals: [0,2,4,5,7,9,10],  icon: '⚡', group: '调式' },
+  major_triad:  { name: '大三和弦', intervals: [0,4,7],    icon: '△', group: '和弦' },
+  minor_triad:  { name: '小三和弦', intervals: [0,3,7],    icon: 'm', group: '和弦' },
+  dim_triad:    { name: '减三和弦', intervals: [0,3,6],    icon: '°', group: '和弦' },
+  aug_triad:    { name: '增三和弦', intervals: [0,4,8],    icon: '+', group: '和弦' },
+  major7:       { name: '大七和弦', intervals: [0,4,7,11], icon: '△⁷', group: '和弦' },
+  minor7:       { name: '小七和弦', intervals: [0,3,7,10], icon: 'm⁷', group: '和弦' },
+  dom7:         { name: '属七和弦', intervals: [0,4,7,10], icon: '⁷', group: '和弦' },
+  major_arp:    { name: '大调琶音', intervals: [0,4,7,12],    icon: '🎼', group: '琶音' },
+  minor_arp:    { name: '小调琶音', intervals: [0,3,7,12],    icon: '🎵', group: '琶音' },
+  major7_arp:   { name: '大七琶音', intervals: [0,4,7,11,12], icon: '🎶', group: '琶音' },
+  minor7_arp:   { name: '小七琶音', intervals: [0,3,7,10,12], icon: '♪', group: '琶音' },
+  dom7_arp:     { name: '属七琶音', intervals: [0,4,7,10,12], icon: '♫', group: '琶音' }
 };
 
 var ROOT_NOTES = [
@@ -2349,7 +2422,18 @@ function generateScaleNotes(rootMidi, scaleType, numOctaves) {
 
 function getFingering(rootName, scaleType, hand) {
   var key = rootName + '_' + scaleType + '_' + hand;
-  return SCALE_FINGERINGS[key] || null;
+  if (SCALE_FINGERINGS[key]) return SCALE_FINGERINGS[key];
+  var type = SCALE_TYPES[scaleType];
+  if (!type) return null;
+  var noteCount = type.intervals.length;
+  if (noteCount === 7) return hand === 'rh' ? [1,2,3,1,2,3,4,5] : [5,4,3,2,1,3,2,1];
+  if (noteCount === 5) return hand === 'rh' ? [1,2,3,4,5] : [5,4,3,2,1];
+  if (noteCount === 6) return hand === 'rh' ? [1,2,3,1,2,3] : [5,4,3,2,1,3];
+  if (noteCount === 12) return hand === 'rh' ? [1,3,1,3,1,2,3,1,3,1,3,1,2] : [3,1,3,1,3,2,1,3,1,3,1,3,2];
+  if (noteCount === 3) return hand === 'rh' ? [1,3,5] : [5,3,1];
+  if (noteCount === 4) return hand === 'rh' ? [1,2,3,5] : [5,3,2,1];
+  if (scaleType.indexOf('_arp') >= 0) { if (noteCount === 4) return hand === 'rh' ? [1,2,3,5] : [5,3,2,1]; if (noteCount === 5) return hand === 'rh' ? [1,2,3,4,5] : [5,4,3,2,1]; }
+  return null;
 }
 
 // === Metronome ===
@@ -2511,7 +2595,7 @@ var ScalePractice = (function() {
     this.state='SETUP'; var c=this.config;
     var groups={}; var typeKeys=Object.keys(SCALE_TYPES);
     for(var i=0;i<typeKeys.length;i++){var t=SCALE_TYPES[typeKeys[i]];if(!groups[t.group])groups[t.group]=[];groups[t.group].push({key:typeKeys[i],name:t.name,icon:t.icon});}
-    var typeOptions=''; var groupNames=['基础','调式','特殊','和弦','琶音'];
+    var typeOptions=''; var groupNames=['音阶','调式','和弦','琶音'];
     for(var g=0;g<groupNames.length;g++){var gn=groupNames[g];if(!groups[gn])continue;typeOptions+='<optgroup label="'+gn+'">';for(var j=0;j<groups[gn].length;j++){var item=groups[gn][j];typeOptions+='<option value="'+item.key+'"'+(item.key===c.scaleType?' selected':'')+'>'+item.icon+' '+item.name+'</option>';}typeOptions+='</optgroup>';}
     var rootOptions='';for(var i=0;i<ROOT_NOTES.length;i++)rootOptions+='<option value="'+ROOT_NOTES[i].name+'"'+(ROOT_NOTES[i].name===c.rootNote?' selected':'')+'>'+ROOT_NOTES[i].name+'</option>';
     var timeSigOptions='';var timeSigs=[[2,'2/4'],[3,'3/4'],[4,'4/4'],[5,'5/4'],[6,'6/8'],[7,'7/8']];for(var i=0;i<timeSigs.length;i++)timeSigOptions+='<option value="'+timeSigs[i][0]+'"'+(timeSigs[i][0]===c.timeSigBeats?' selected':'')+'>'+timeSigs[i][1]+'</option>';
@@ -2607,8 +2691,8 @@ var ScalePractice = (function() {
         '<div class="score-display" id="scaleScoreDisplay" style="max-width:820px;padding:16px 20px;min-height:200px;flex-direction:column">'+
           '<div id="scaleStaffCanvas" style="width:100%"></div>'+
         '</div>'+
+        (c.mode==='follow'?'<div class="follow-hint" id="followHint">🎹 点击下方琴键确认音符</div>':'')+
         '<div class="piano-container" id="scalePianoContainer" style="display:block"><div class="piano" id="scalePianoKeys"></div></div>'+
-        (c.mode==='follow'?'<div class="answer-options" id="scaleAnswerOptions" style="max-width:560px">'+NOTES.map(function(n){return '<button class="answer-btn" data-note="'+n+'" onclick="app.scalePractice.submitAnswer(\''+n+'\')"><span style="color:'+NOTE_COLORS[n]+'">'+n+'</span></button>';}).join('')+'</div>':'')+
         '<div style="display:flex;gap:12px;justify-content:center;margin-top:8px">'+
           '<button class="btn btn-outline" id="sPauseBtn" onclick="app.scalePractice.togglePause()" style="display:none">⏸ 暂停</button>'+
           '<button class="btn btn-danger btn-sm" onclick="app.scalePractice.stop()">⏹ 停止</button>'+
@@ -2694,8 +2778,9 @@ var ScalePractice = (function() {
     var whiteKeys=[];
     for(var oct=startOctave;oct<=endOctave+1;oct++){for(var wi=0;wi<7;wi++){var midi=(oct+1)*12+[0,2,4,5,7,9,11][wi];if(midi<startMidi-2)continue;if(midi>endMidi+2)break;whiteKeys.push({name:whiteNoteNames[wi],octave:oct,midi:midi});}if(oct>endOctave)break;}
     var kw=36;container.style.width=(whiteKeys.length*kw)+'px';container.innerHTML='';
-    for(var i=0;i<whiteKeys.length;i++){var wk=whiteKeys[i];var k=document.createElement('div');k.className='white-key';k.style.left=(i*kw)+'px';if(note&&note.name===wk.name&&note.octave===wk.octave)k.classList.add('active');var l=document.createElement('span');l.className='key-label';l.textContent=wk.name+wk.octave;if(wk.name==='C'&&wk.octave===4){l.style.color='#6c63ff';l.style.fontWeight='bold';k.style.borderLeft='2px solid #6c63ff';}k.appendChild(l);k.addEventListener('click',(function(wk){return function(){var entry=PIANO_NOTES[wk.name+wk.octave];if(entry)audio.playNote(entry.freq,1.5);};})(wk));container.appendChild(k);}
-    for(var i=0;i<whiteKeys.length-1;i++){var wk=whiteKeys[i];var noteIdx=['C','D','E','F','G','A','B'].indexOf(wk.name);if(blackNotePattern[noteIdx]){var bk=document.createElement('div');bk.className='black-key';bk.style.left=((i+0.6)*kw)+'px';var bn=wk.name+'#';var bo=wk.octave;bk.addEventListener('click',(function(bn,bo){return function(e){e.stopPropagation();var entry=PIANO_NOTES[bn+bo];if(entry)audio.playNote(entry.freq,1.5);};})(bn,bo));container.appendChild(bk);}}
+    var self=this;
+    for(var i=0;i<whiteKeys.length;i++){var wk=whiteKeys[i];var k=document.createElement('div');k.className='white-key';k.style.left=(i*kw)+'px';if(note&&note.name===wk.name&&note.octave===wk.octave)k.classList.add('active');var l=document.createElement('span');l.className='key-label';l.textContent=wk.name+wk.octave;if(wk.name==='C'&&wk.octave===4){l.style.color='#6c63ff';l.style.fontWeight='bold';k.style.borderLeft='2px solid #6c63ff';}k.appendChild(l);k.addEventListener('click',(function(wk){return function(){var entry=PIANO_NOTES[wk.name+wk.octave];if(entry)audio.playNote(entry.freq,1.5);if(self.state==='PLAYING'&&self.config.mode==='follow')self.submitAnswer(wk.name);};})(wk));container.appendChild(k);}
+    for(var i=0;i<whiteKeys.length-1;i++){var wk=whiteKeys[i];var noteIdx=['C','D','E','F','G','A','B'].indexOf(wk.name);if(blackNotePattern[noteIdx]){var bk=document.createElement('div');bk.className='black-key';bk.style.left=((i+0.6)*kw)+'px';var bn=wk.name+'#';var bo=wk.octave;bk.addEventListener('click',(function(bn,bo){return function(e){e.stopPropagation();var entry=PIANO_NOTES[bn+bo];if(entry)audio.playNote(entry.freq,1.5);if(self.state==='PLAYING'&&self.config.mode==='follow')self.submitAnswer(bn.replace('#',''));};})(bn,bo));container.appendChild(bk);}}
   };
   ScalePractice.prototype._renderResults = function() {
     var ss=this.sessionStats;var duration=Date.now()-ss.startTime;var accuracy=ss.totalNotes>0?Math.round((ss.correctNotes/ss.totalNotes)*100):0;

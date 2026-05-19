@@ -1138,6 +1138,92 @@ body::after {
   text-align: center;
 }
 
+/* ========== Follow Mode Hint ========== */
+.follow-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cyan);
+  padding: 6px 0;
+  animation: scorePulse 2s ease-in-out infinite;
+}
+
+/* ========== Piano Keyboard — Larger, Scrollable ========== */
+.piano-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+  -webkit-overflow-scrolling: touch;
+}
+.piano {
+  position: relative;
+  height: 90px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.piano .white-key {
+  width: 32px;
+  height: 90px;
+}
+.piano .black-key {
+  width: 20px;
+  height: 56px;
+}
+
+/* ========== Mobile Landscape ========== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .main-content { padding: 8px 12px; }
+  .page-header { margin-bottom: 12px; }
+  .page-title { font-size: 1rem; }
+  .page-desc { display: none; }
+
+  .practice-bar { padding: 4px 10px; font-size: 0.72rem; gap: 8px; }
+  .practice-bar .stat-value { font-size: 0.85rem; }
+
+  .beat-indicator { padding: 4px 0; gap: 6px; }
+  .bi-dot { width: 10px; height: 10px; }
+
+  .score-display {
+    padding: 8px 12px;
+    min-height: 120px;
+  }
+
+  .piano-container { padding: 4px 0; }
+  .piano { height: 70px; }
+  .piano .white-key { width: 28px; height: 70px; }
+  .piano .black-key { width: 18px; height: 44px; }
+  .piano .white-key .key-label { font-size: 0.5rem; bottom: 3px; }
+
+  .follow-hint { font-size: 0.75rem; padding: 3px 0; }
+
+  .answer-options { gap: 4px; }
+  .answer-btn { padding: 8px 4px; font-size: 0.85rem; }
+
+  .card { padding: 10px 14px; margin-bottom: 8px; }
+  .setting-row { padding: 6px 0; }
+
+  .grid-2 { gap: 8px; }
+
+  .btn-lg { padding: 8px 20px; font-size: 0.85rem; }
+
+  .results-panel { padding: 12px 10px; }
+  .result-icon { font-size: 2rem; margin-bottom: 6px; }
+  .result-title { font-size: 1rem; margin-bottom: 4px; }
+  .results-grid { gap: 8px; margin-bottom: 12px; }
+  .result-stat .result-stat-value { font-size: 1.2rem; }
+}
+
+/* Tablet landscape */
+@media (min-width: 768px) and (max-height: 600px) {
+  .score-display { min-height: 150px; padding: 10px 16px; }
+  .piano { height: 80px; }
+  .piano .white-key { width: 30px; height: 80px; }
+  .piano .black-key { width: 19px; height: 50px; }
+}
+
 /* Sidebar glow line */
 .sidebar::after {
   content: '';

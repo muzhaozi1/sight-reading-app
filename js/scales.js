@@ -2,45 +2,32 @@
 
 // === Scale Type Definitions (intervals in semitones from root) ===
 var SCALE_TYPES = {
-  major:           { name: '大调',     intervals: [0,2,4,5,7,9,11], icon: '🎼', group: '基础' },
-  natural_minor:   { name: '自然小调', intervals: [0,2,3,5,7,8,10], icon: '🌙', group: '基础' },
-  harmonic_minor:  { name: '和声小调', intervals: [0,2,3,5,7,8,11], icon: '🎻', group: '基础' },
-  melodic_minor:   { name: '旋律小调', intervals: [0,2,3,5,7,9,11], icon: '🎹', group: '基础' },
-  pentatonic_major:{ name: '大调五声', intervals: [0,2,4,7,9],      icon: '🎵', group: '基础' },
-  pentatonic_minor:{ name: '小调五声', intervals: [0,3,5,7,10],     icon: '🎶', group: '基础' },
-  blues:           { name: '布鲁斯',   intervals: [0,3,5,6,7,10],   icon: '🎷', group: '特殊' },
-  chromatic:       { name: '半音阶',   intervals: [0,1,2,3,4,5,6,7,8,9,10,11], icon: '🎹', group: '特殊' },
-  whole_tone:      { name: '全音阶',   intervals: [0,2,4,6,8,10],   icon: '✨', group: '特殊' },
-  diminished:      { name: '减音阶',   intervals: [0,2,3,5,6,8,9,11], icon: '💎', group: '特殊' },
-  ionian:     { name: 'Ionian',     intervals: [0,2,4,5,7,9,11],  icon: '☀️', group: '调式' },
-  dorian:     { name: 'Dorian',     intervals: [0,2,3,5,7,9,10],  icon: '🌿', group: '调式' },
-  phrygian:   { name: 'Phrygian',   intervals: [0,1,3,5,7,8,10],  icon: '🌊', group: '调式' },
-  lydian:     { name: 'Lydian',     intervals: [0,2,4,6,7,9,11],  icon: '☁️', group: '调式' },
-  mixolydian: { name: 'Mixolydian', intervals: [0,2,4,5,7,9,10],  icon: '⚡', group: '调式' },
-  aeolian:    { name: 'Aeolian',    intervals: [0,2,3,5,7,8,10],  icon: '🍂', group: '调式' },
-  locrian:    { name: 'Locrian',    intervals: [0,1,3,5,6,8,10],  icon: '🌑', group: '调式' },
-
+  // 音阶 (Scales)
+  major:           { name: '大调',     intervals: [0,2,4,5,7,9,11], icon: '🎼', group: '音阶' },
+  natural_minor:   { name: '自然小调', intervals: [0,2,3,5,7,8,10], icon: '🌙', group: '音阶' },
+  harmonic_minor:  { name: '和声小调', intervals: [0,2,3,5,7,8,11], icon: '🎻', group: '音阶' },
+  melodic_minor:   { name: '旋律小调', intervals: [0,2,3,5,7,9,11], icon: '🎹', group: '音阶' },
+  pentatonic_major:{ name: '大调五声', intervals: [0,2,4,7,9],      icon: '🎵', group: '音阶' },
+  pentatonic_minor:{ name: '小调五声', intervals: [0,3,5,7,10],     icon: '🎶', group: '音阶' },
+  blues:           { name: '布鲁斯',   intervals: [0,3,5,6,7,10],   icon: '🎷', group: '音阶' },
+  chromatic:       { name: '半音阶',   intervals: [0,1,2,3,4,5,6,7,8,9,10,11], icon: '🎹', group: '音阶' },
+  // 常用调式 (Common Modes)
+  dorian:     { name: 'Dorian 小调',   intervals: [0,2,3,5,7,9,10],  icon: '🌿', group: '调式' },
+  mixolydian: { name: 'Mixolydian 属', intervals: [0,2,4,5,7,9,10],  icon: '⚡', group: '调式' },
   // 和弦 (Chords)
-  major_triad:      { name: '大三和弦',     intervals: [0,4,7],       icon: '△', group: '和弦' },
-  minor_triad:      { name: '小三和弦',     intervals: [0,3,7],       icon: 'm', group: '和弦' },
-  diminished_triad: { name: '减三和弦',     intervals: [0,3,6],       icon: '°', group: '和弦' },
-  augmented_triad:  { name: '增三和弦',     intervals: [0,4,8],       icon: '+', group: '和弦' },
-  major7:           { name: '大七和弦',     intervals: [0,4,7,11],    icon: '△⁷', group: '和弦' },
-  minor7:           { name: '小七和弦',     intervals: [0,3,7,10],    icon: 'm⁷', group: '和弦' },
-  dom7:             { name: '属七和弦',     intervals: [0,4,7,10],    icon: '⁷', group: '和弦' },
-  dim7:             { name: '减七和弦',     intervals: [0,3,6,9],     icon: '°⁷', group: '和弦' },
-  half_dim7:        { name: '半减七和弦',   intervals: [0,3,6,10],    icon: 'ø⁷', group: '和弦' },
-  sus4:             { name: '挂四和弦',     intervals: [0,5,7],       icon: 'sus4', group: '和弦' },
-  sus2:             { name: '挂二和弦',     intervals: [0,2,7],       icon: 'sus2', group: '和弦' },
-
+  major_triad:  { name: '大三和弦', intervals: [0,4,7],    icon: '△', group: '和弦' },
+  minor_triad:  { name: '小三和弦', intervals: [0,3,7],    icon: 'm', group: '和弦' },
+  dim_triad:    { name: '减三和弦', intervals: [0,3,6],    icon: '°', group: '和弦' },
+  aug_triad:    { name: '增三和弦', intervals: [0,4,8],    icon: '+', group: '和弦' },
+  major7:       { name: '大七和弦', intervals: [0,4,7,11], icon: '△⁷', group: '和弦' },
+  minor7:       { name: '小七和弦', intervals: [0,3,7,10], icon: 'm⁷', group: '和弦' },
+  dom7:         { name: '属七和弦', intervals: [0,4,7,10], icon: '⁷', group: '和弦' },
   // 琶音 (Arpeggios)
-  major_arp:        { name: '大调琶音',     intervals: [0,4,7,12],    icon: '🎼', group: '琶音' },
-  minor_arp:        { name: '小调琶音',     intervals: [0,3,7,12],    icon: '🎵', group: '琶音' },
-  dim_arp:          { name: '减琶音',       intervals: [0,3,6,12],    icon: '🔻', group: '琶音' },
-  aug_arp:          { name: '增琶音',       intervals: [0,4,8,12],    icon: '🔺', group: '琶音' },
-  major7_arp:       { name: '大七琶音',     intervals: [0,4,7,11,12], icon: '🎶', group: '琶音' },
-  minor7_arp:       { name: '小七琶音',     intervals: [0,3,7,10,12], icon: '♪', group: '琶音' },
-  dom7_arp:         { name: '属七琶音',     intervals: [0,4,7,10,12], icon: '♫', group: '琶音' }
+  major_arp:    { name: '大调琶音', intervals: [0,4,7,12],    icon: '🎼', group: '琶音' },
+  minor_arp:    { name: '小调琶音', intervals: [0,3,7,12],    icon: '🎵', group: '琶音' },
+  major7_arp:   { name: '大七琶音', intervals: [0,4,7,11,12], icon: '🎶', group: '琶音' },
+  minor7_arp:   { name: '小七琶音', intervals: [0,3,7,10,12], icon: '♪', group: '琶音' },
+  dom7_arp:     { name: '属七琶音', intervals: [0,4,7,10,12], icon: '♫', group: '琶音' }
 };
 
 var ROOT_NOTES = [
@@ -94,7 +81,44 @@ function generateScaleNotes(rootMidi, scaleType, numOctaves) {
 
 function getFingering(rootName, scaleType, hand) {
   var key = rootName + '_' + scaleType + '_' + hand;
-  return SCALE_FINGERINGS[key] || null;
+  if (SCALE_FINGERINGS[key]) return SCALE_FINGERINGS[key];
+
+  // Default fingering patterns based on scale type
+  var type = SCALE_TYPES[scaleType];
+  if (!type) return null;
+  var noteCount = type.intervals.length;
+
+  // Major-like 7-note scales (major, natural minor, harmonic minor, melodic minor, dorian, mixolydian)
+  if (noteCount === 7) {
+    return hand === 'rh' ? [1,2,3,1,2,3,4,5] : [5,4,3,2,1,3,2,1];
+  }
+  // Pentatonic (5 notes)
+  if (noteCount === 5) {
+    return hand === 'rh' ? [1,2,3,4,5] : [5,4,3,2,1];
+  }
+  // Blues (6 notes)
+  if (noteCount === 6) {
+    return hand === 'rh' ? [1,2,3,1,2,3] : [5,4,3,2,1,3];
+  }
+  // Chromatic (12 notes)
+  if (noteCount === 12) {
+    return hand === 'rh' ? [1,3,1,3,1,2,3,1,3,1,3,1,2] : [3,1,3,1,3,2,1,3,1,3,1,3,2];
+  }
+  // Triads (3 notes)
+  if (noteCount === 3) {
+    return hand === 'rh' ? [1,3,5] : [5,3,1];
+  }
+  // 7th chords (4 notes)
+  if (noteCount === 4) {
+    return hand === 'rh' ? [1,2,3,5] : [5,3,2,1];
+  }
+  // Arpeggios (4-5 notes with octave)
+  if (scaleType.indexOf('_arp') >= 0) {
+    if (noteCount === 4) return hand === 'rh' ? [1,2,3,5] : [5,3,2,1];
+    if (noteCount === 5) return hand === 'rh' ? [1,2,3,4,5] : [5,4,3,2,1];
+  }
+
+  return null;
 }
 
 // === Metronome (Web Audio API lookahead scheduler) ===
@@ -361,7 +385,7 @@ var ScalePractice = (function() {
       groups[t.group].push({ key: typeKeys[i], name: t.name, icon: t.icon });
     }
     var typeOptions = '';
-    var groupNames = ['基础', '调式', '特殊', '和弦', '琶音'];
+    var groupNames = ['音阶', '调式', '和弦', '琶音'];
     for (var g = 0; g < groupNames.length; g++) {
       var gn = groupNames[g];
       if (!groups[gn]) continue;
@@ -590,16 +614,8 @@ var ScalePractice = (function() {
           '<div id="scaleStaffCanvas" style="width:100%"></div>' +
         '</div>' +
 
+        (c.mode === 'follow' ? '<div class="follow-hint" id="followHint">🎹 点击下方琴键确认音符</div>' : '') +
         '<div class="piano-container" id="scalePianoContainer" style="display:block"><div class="piano" id="scalePianoKeys"></div></div>' +
-
-        (c.mode === 'follow' ?
-          '<div class="answer-options" id="scaleAnswerOptions" style="max-width:560px">' +
-            NOTES.map(function(n) {
-              return '<button class="answer-btn" data-note="' + n + '" onclick="app.scalePractice.submitAnswer(\'' + n + '\')">' +
-                '<span style="color:' + NOTE_COLORS[n] + '">' + n + '</span></button>';
-            }).join('') +
-          '</div>'
-        : '') +
 
         '<div style="display:flex;gap:12px;justify-content:center;margin-top:8px">' +
           '<button class="btn btn-outline" id="sPauseBtn" onclick="app.scalePractice.togglePause()" style="display:none">⏸ 暂停</button>' +
@@ -906,7 +922,14 @@ var ScalePractice = (function() {
       label.textContent = wk.name + wk.octave;
       if (wk.name === 'C' && wk.octave === 4) { label.style.color = '#6c63ff'; label.style.fontWeight = 'bold'; key.style.borderLeft = '2px solid #6c63ff'; }
       key.appendChild(label);
-      key.addEventListener('click', (function(wk) { return function() { var entry = PIANO_NOTES[wk.name + wk.octave]; if (entry) audio.playNote(entry.freq, 1.5); }; })(wk));
+      var self = this;
+      key.addEventListener('click', (function(wk) { return function() {
+        var entry = PIANO_NOTES[wk.name + wk.octave];
+        if (entry) audio.playNote(entry.freq, 1.5);
+        if (self.state === 'PLAYING' && self.config.mode === 'follow') {
+          self.submitAnswer(wk.name);
+        }
+      }; })(wk));
       container.appendChild(key);
     }
 
@@ -920,7 +943,8 @@ var ScalePractice = (function() {
         bk.style.left = ((i + 0.6) * keyWidth) + 'px';
         var blackName = wk.name + '#';
         var blackOctave = wk.octave;
-        bk.addEventListener('click', (function(blackName, blackOctave) { return function(e) { e.stopPropagation(); var entry = PIANO_NOTES[blackName + blackOctave]; if (entry) audio.playNote(entry.freq, 1.5); }; })(blackName, blackOctave));
+        var self2 = this;
+        bk.addEventListener('click', (function(blackName, blackOctave) { return function(e) { e.stopPropagation(); var entry = PIANO_NOTES[blackName + blackOctave]; if (entry) audio.playNote(entry.freq, 1.5); if (self2.state === 'PLAYING' && self2.config.mode === 'follow') { self2.submitAnswer(blackName.replace('#','')); } }; })(blackName, blackOctave));
         container.appendChild(bk);
       }
     }
