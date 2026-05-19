@@ -649,7 +649,9 @@ class App {
       ps.correct++;
       ps.combo++;
       if (ps.combo > ps.maxCombo) ps.maxCombo = ps.combo;
-      audio.playCorrect();
+      // Play the note's frequency instead of generic correct sound
+      var freq = getFrequencyForKey(ps.currentNote.key);
+      audio.playNote(freq, 1.5);
 
       var btn = document.querySelector('.answer-btn[data-note="' + answer + '"]');
       if (btn) btn.classList.add('correct');

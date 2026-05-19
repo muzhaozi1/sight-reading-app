@@ -477,30 +477,6 @@ var ScalePractice = (function() {
       '<div class="fade-in">' +
         '<div class="page-header"><div><div class="page-title">🎼 音阶跟练</div><div class="page-desc">节拍器驱动的音阶练习，支持指法提示和自适应速度</div></div></div>' +
 
-        // Standalone Metronome Card
-        '<div class="card" id="standaloneMetroCard">' +
-          '<div class="card-header"><span class="card-title">🥁 节拍器</span>' +
-            '<button class="btn btn-sm' + (this._standaloneMetro ? ' btn-danger' : ' btn-primary') + '" id="standaloneMetroBtn" onclick="app.scalePractice.toggleStandaloneMetro()">' +
-              (this._standaloneMetro ? '⏹ 停止' : '▶ 开始') +
-            '</button>' +
-          '</div>' +
-          '<div class="beat-indicator" id="standaloneBeatIndicator" style="margin-bottom:10px">' + this._renderBeatIndicatorDots() + '</div>' +
-          '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
-            '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:0.8rem;color:var(--text2)">BPM</span>' +
-              '<input type="range" id="metroBpmSlider" min="20" max="300" value="' + c.bpm + '" class="bpm-slider" style="width:120px" oninput="app.scalePractice.setMetroBpm(+this.value)">' +
-              '<span class="stat-value" id="metroBpmDisplay" style="color:var(--warning);min-width:35px">' + c.bpm + '</span>' +
-            '</div>' +
-            '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:0.8rem;color:var(--text2)">拍号</span>' +
-              '<select id="metroTimeSig" class="scale-select" style="min-width:60px" onchange="app.scalePractice.setMetroTimeSig(+this.value)">' + timeSigOptions + '</select>' +
-            '</div>' +
-            '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:0.8rem;color:var(--text2)">细分</span>' +
-              '<select id="metroSubdivision" class="scale-select" style="min-width:100px" onchange="app.scalePractice.setMetroSubdivision(this.value)">' + subOptions + '</select>' +
-            '</div>' +
-            '<div id="metroBeatDots" class="beat-dots">' + this._renderBeatDots() + '</div>' +
-            '<button class="btn btn-sm btn-outline" onclick="app.scalePractice.metroTapTempo()">TAP</button>' +
-          '</div>' +
-        '</div>' +
-
         '<div class="grid grid-2">' +
           // Scale Selection Card
           '<div class="card">' +
@@ -524,6 +500,7 @@ var ScalePractice = (function() {
           // Metronome Settings Card
           '<div class="card">' +
             '<div class="card-header"><span class="card-title">🥁 节拍器设置</span></div>' +
+            '<div class="beat-indicator" id="metroBeatIndicator" style="margin-bottom:10px">' + this._renderBeatIndicatorDots() + '</div>' +
             '<div class="setting-row"><div class="setting-label">BPM</div>' +
               '<div style="display:flex;align-items:center;gap:8px">' +
                 '<input type="range" id="bpmSlider" min="20" max="300" value="' + c.bpm + '" class="bpm-slider" oninput="app.scalePractice.setBpm(+this.value)">' +
@@ -534,6 +511,12 @@ var ScalePractice = (function() {
             '<div class="setting-row"><div class="setting-label">拍号</div><select id="timeSig" class="scale-select" onchange="app.scalePractice.setTimeSig(+this.value)">' + timeSigOptions + '</select></div>' +
             '<div class="setting-row"><div class="setting-label">细分节拍</div><select id="subdivision" class="scale-select" onchange="app.scalePractice.config.subdivision=this.value">' + subOptions + '</select></div>' +
             '<div class="setting-row"><div class="setting-label">节拍类型</div><div id="beatTypeDots" class="beat-dots">' + this._renderBeatDots() + '</div></div>' +
+            '<div style="text-align:center;margin-top:12px">' +
+              '<button class="btn btn-sm' + (this._standaloneMetro ? ' btn-danger' : ' btn-primary') + '" id="standaloneMetroBtn" onclick="app.scalePractice.toggleStandaloneMetro()">' +
+                (this._standaloneMetro ? '⏹ 停止节拍器' : '▶ 单独使用节拍器') +
+              '</button>' +
+              '<div style="font-size:0.7rem;color:var(--text3);margin-top:4px">点击可单独使用节拍器，无需开始音阶练习</div>' +
+            '</div>' +
           '</div>' +
         '</div>' +
 
@@ -655,7 +638,7 @@ var ScalePractice = (function() {
       this._standaloneMetro.stop();
       this._standaloneMetro = null;
       var btn = document.getElementById('standaloneMetroBtn');
-      if (btn) { btn.textContent = '▶ 开始'; btn.className = 'btn btn-sm btn-primary'; }
+      if (btn) { btn.textContent = '▶ 单独使用节拍器'; btn.className = 'btn btn-sm btn-primary'; }
       // Clear beat indicator
       for (var i = 0; i < this.config.timeSigBeats; i++) {
         var el = document.getElementById('biDot' + i);
@@ -680,7 +663,7 @@ var ScalePractice = (function() {
       };
       this._standaloneMetro.start();
       var btn = document.getElementById('standaloneMetroBtn');
-      if (btn) { btn.textContent = '⏹ 停止'; btn.className = 'btn btn-sm btn-danger'; }
+      if (btn) { btn.textContent = '⏹ 停止节拍器'; btn.className = 'btn btn-sm btn-danger'; }
     }
   };
 
