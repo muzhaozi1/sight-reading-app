@@ -140,15 +140,26 @@ var Metronome = (function() {
 
   Metronome.prototype.getBeatDuration = function() { return 60.0 / this.bpm; };
 
-  Metronome.prototype.getSubdivisionDuration = function() {
-    var bd = this.getBeatDuration();
+  // Subdivision patterns: array of time fractions within one beat
+  Metronome.prototype.getSubdivisionPattern = function() {
     switch (this.subdivision) {
-      case 'quarter': return bd;
-      case 'eighth': return bd / 2;
-      case 'triplet': return bd / 3;
-      case 'sixteenth': return bd / 4;
-      default: return bd;
+      case 'quarter':     return [1];
+      case 'eighth':      return [0.5, 0.5];
+      case 'triplet':     return [1/3, 1/3, 1/3];
+      case 'sixteenth':   return [0.25, 0.25, 0.25, 0.25];
+      case 'q_e':         return [2/3, 1/3];           // 前四后八
+      case 'e_s':         return [0.5, 0.25, 0.25];    // 前八后十六
+      case 's_e':         return [0.25, 0.25, 0.5];    // 前十六后八
+      case 'dotted':      return [0.75, 0.25];         // 附点
+      case 'syncopation': return [0.25, 0.5, 0.25];   // 切分
+      default:            return [1];
     }
+  };
+
+  // Legacy: duration of first subdivision step
+  Metronome.prototype.getSubdivisionDuration = function() {
+    var pattern = this.getSubdivisionPattern();
+    return this.getBeatDuration() * pattern[0];
   };
 
   Metronome.prototype.setBpm = function(bpm) { this.bpm = Math.max(20, Math.min(300, bpm)); };
@@ -183,6 +194,7 @@ var Metronome = (function() {
     if (this.isPlaying) return;
     this.isPlaying = true;
     this._currentBeat = 0;
+    this._currentStep = 0;
     this._nextBeatTime = this.ctx.currentTime + 0.05;
     this._scheduler();
   };
@@ -191,32 +203,49 @@ var Metronome = (function() {
     this.isPlaying = false;
     if (this._timerID) { clearTimeout(this._timerID); this._timerID = null; }
     this._currentBeat = 0;
+    this._currentStep = 0;
   };
 
   Metronome.prototype._scheduler = function() {
     var self = this;
+    var pattern = this.getSubdivisionPattern();
     while (this._nextBeatTime < this.ctx.currentTime + this._scheduleAheadTime) {
-      this._scheduleBeat(this._currentBeat, this._nextBeatTime);
-      this._nextBeatTime += this.getSubdivisionDuration();
-      this._currentBeat++;
+      var isMainBeat = (this._currentStep === 0);
+      this._scheduleBeat(this._currentBeat, this._nextBeatTime, isMainBeat, this._currentStep);
+      // Advance to next step in pattern
+      var stepDuration = this.getBeatDuration() * pattern[this._currentStep];
+      this._currentStep++;
+      if (this._currentStep >= pattern.length) {
+        this._currentStep = 0;
+        this._currentBeat++;
+      }
+      this._nextBeatTime += stepDuration;
     }
     this._timerID = setTimeout(function() { self._scheduler(); }, this._lookahead);
   };
 
-  Metronome.prototype._scheduleBeat = function(beatIndex, time) {
+  Metronome.prototype._scheduleBeat = function(beatIndex, time, isMainBeat, stepIndex) {
     var beatInBar = beatIndex % this.timeSignature.beats;
     var beatType = this.beatTypes[beatInBar] || 'normal';
-    if (beatType !== 'muted') this._playClick(time, beatType === 'accent');
-    if (this.onBeat) this.onBeat(beatIndex, time, beatType);
+    if (beatType !== 'muted') {
+      if (isMainBeat) {
+        this._playClick(time, beatType === 'accent');
+      } else {
+        // Softer click for subdivision steps
+        this._playClick(time, false, 0.4);
+      }
+    }
+    if (this.onBeat) this.onBeat(beatIndex, time, beatType, isMainBeat, stepIndex);
   };
 
-  Metronome.prototype._playClick = function(time, isAccent) {
+  Metronome.prototype._playClick = function(time, isAccent, volumeMul) {
+    var vol = volumeMul || 1;
     var ctx = this.ctx;
     var osc = ctx.createOscillator();
     var gain = ctx.createGain();
     osc.type = 'sine';
     osc.frequency.value = isAccent ? 1000 : 800;
-    gain.gain.setValueAtTime(isAccent ? 0.3 : 0.15, time);
+    gain.gain.setValueAtTime((isAccent ? 0.3 : 0.15) * vol, time);
     gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -369,6 +398,7 @@ var ScalePractice = (function() {
     this.currentPassTotal = 0;
     this.sessionStats = { startTime: 0, totalNotes: 0, correctNotes: 0, bpmHistory: [] };
     this._countInMetro = null;
+    this.practiceRound = 0;  // 练习次数计数
   }
 
   ScalePractice.prototype.renderSetup = function() {
@@ -412,7 +442,17 @@ var ScalePractice = (function() {
 
     // Subdivision options
     var subOptions = '';
-    var subs = [['quarter','四分音符 ♩'],['eighth','八分音符 ♪'],['triplet','三连音'],['sixteenth','十六分音符 ♬']];
+    var subs = [
+      ['quarter','四分音符 ♩'],
+      ['eighth','八分音符 ♪♪'],
+      ['triplet','三连音 ♪♪♪'],
+      ['sixteenth','十六分音符 ♬♬♬♬'],
+      ['q_e','前四后八 ♩♪'],
+      ['e_s','前八后十六 ♪♬♬'],
+      ['s_e','前十六后八 ♬♬♪'],
+      ['dotted','附点节奏 ♩.♪'],
+      ['syncopation','切分节奏 ♬♩♬']
+    ];
     for (var i = 0; i < subs.length; i++) {
       subOptions += '<option value="' + subs[i][0] + '"' + (subs[i][0] === c.subdivision ? ' selected' : '') + '>' + subs[i][1] + '</option>';
     }
@@ -578,6 +618,7 @@ var ScalePractice = (function() {
     this.consecutiveCleanPasses = 0;
     this.currentPassCorrect = 0;
     this.currentPassTotal = 0;
+    this.practiceRound++;
     this.sessionStats = { startTime: Date.now(), totalNotes: 0, correctNotes: 0, bpmHistory: [this.config.bpm] };
 
     document.getElementById('scaleSetup').style.display = 'none';
@@ -605,6 +646,7 @@ var ScalePractice = (function() {
           '<div class="stat-item"><span>音阶</span> <span class="stat-value" style="font-size:0.85rem">' + scaleName + '</span></div>' +
           '<div class="stat-item"><span>BPM</span> <span class="stat-value" id="sBpmDisplay" style="color:var(--warning)">' + c.bpm + '</span></div>' +
           '<div class="stat-item"><span>进度</span> <span class="stat-value" id="sProgressText">0/' + totalNotes + '</span></div>' +
+          '<div class="stat-item"><span>第</span> <span class="stat-value" id="sRoundDisplay" style="color:var(--cyan)">' + this.practiceRound + '</span> <span>次</span></div>' +
           '<div class="stat-item combo" id="sAccuracyDisplay" style="display:none"><span>正确率</span> <span class="stat-value">0%</span></div>' +
         '</div>' +
 
@@ -619,6 +661,7 @@ var ScalePractice = (function() {
 
         '<div style="display:flex;gap:12px;justify-content:center;margin-top:8px">' +
           '<button class="btn btn-outline" id="sPauseBtn" onclick="app.scalePractice.togglePause()" style="display:none">⏸ 暂停</button>' +
+          '<button class="btn btn-primary btn-sm" onclick="app.scalePractice.restart()">🔄 再练一遍</button>' +
           '<button class="btn btn-danger btn-sm" onclick="app.scalePractice.stop()">⏹ 停止</button>' +
         '</div>' +
       '</div>';
@@ -738,13 +781,10 @@ var ScalePractice = (function() {
   };
 
   ScalePractice.prototype._getSubsPerNote = function() {
-    switch (this.config.subdivision) {
-      case 'quarter': return 1;
-      case 'eighth': return 2;
-      case 'triplet': return 3;
-      case 'sixteenth': return 4;
-      default: return 1;
-    }
+    // Return number of steps per beat for the current subdivision
+    var tempMetro = new Metronome(audio.ctx);
+    tempMetro.subdivision = this.config.subdivision;
+    return tempMetro.getSubdivisionPattern().length;
   };
 
   ScalePractice.prototype.submitAnswer = function(noteName) {
@@ -805,6 +845,14 @@ var ScalePractice = (function() {
       var btn = document.getElementById('sPauseBtn');
       if (btn) btn.textContent = '⏸ 暂停';
     }
+  };
+
+  ScalePractice.prototype.restart = function() {
+    // Stop current practice and start a new one
+    if (this._countInMetro) { this._countInMetro.stop(); this._countInMetro = null; }
+    if (this.metronome) { this.metronome.stop(); this.metronome = null; }
+    if (this.sessionStats.startTime > 0) this._recordSession();
+    this.start();
   };
 
   ScalePractice.prototype.stop = function() {
@@ -968,6 +1016,7 @@ var ScalePractice = (function() {
           '<div class="result-stat"><div class="result-stat-value" style="color:var(--success)">' + accuracy + '%</div><div class="result-stat-label">正确率</div></div>' +
           '<div class="result-stat"><div class="result-stat-value" style="color:var(--warning)">' + maxBpm + '</div><div class="result-stat-label">最高BPM</div></div>' +
           '<div class="result-stat"><div class="result-stat-value" style="color:var(--info)">' + Math.round(duration/1000) + 's</div><div class="result-stat-label">用时</div></div>' +
+          '<div class="result-stat"><div class="result-stat-value" style="color:var(--cyan)">' + this.practiceRound + '</div><div class="result-stat-label">练习次数</div></div>' +
         '</div>' +
         (ss.bpmHistory.length > 1 ?
           '<div class="card" style="text-align:left;max-width:400px;margin:0 auto 20px"><div class="card-title" style="margin-bottom:8px">BPM 变化</div>' +
