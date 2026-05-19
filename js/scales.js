@@ -18,7 +18,29 @@ var SCALE_TYPES = {
   lydian:     { name: 'Lydian',     intervals: [0,2,4,6,7,9,11],  icon: '☁️', group: '调式' },
   mixolydian: { name: 'Mixolydian', intervals: [0,2,4,5,7,9,10],  icon: '⚡', group: '调式' },
   aeolian:    { name: 'Aeolian',    intervals: [0,2,3,5,7,8,10],  icon: '🍂', group: '调式' },
-  locrian:    { name: 'Locrian',    intervals: [0,1,3,5,6,8,10],  icon: '🌑', group: '调式' }
+  locrian:    { name: 'Locrian',    intervals: [0,1,3,5,6,8,10],  icon: '🌑', group: '调式' },
+
+  // 和弦 (Chords)
+  major_triad:      { name: '大三和弦',     intervals: [0,4,7],       icon: '△', group: '和弦' },
+  minor_triad:      { name: '小三和弦',     intervals: [0,3,7],       icon: 'm', group: '和弦' },
+  diminished_triad: { name: '减三和弦',     intervals: [0,3,6],       icon: '°', group: '和弦' },
+  augmented_triad:  { name: '增三和弦',     intervals: [0,4,8],       icon: '+', group: '和弦' },
+  major7:           { name: '大七和弦',     intervals: [0,4,7,11],    icon: '△⁷', group: '和弦' },
+  minor7:           { name: '小七和弦',     intervals: [0,3,7,10],    icon: 'm⁷', group: '和弦' },
+  dom7:             { name: '属七和弦',     intervals: [0,4,7,10],    icon: '⁷', group: '和弦' },
+  dim7:             { name: '减七和弦',     intervals: [0,3,6,9],     icon: '°⁷', group: '和弦' },
+  half_dim7:        { name: '半减七和弦',   intervals: [0,3,6,10],    icon: 'ø⁷', group: '和弦' },
+  sus4:             { name: '挂四和弦',     intervals: [0,5,7],       icon: 'sus4', group: '和弦' },
+  sus2:             { name: '挂二和弦',     intervals: [0,2,7],       icon: 'sus2', group: '和弦' },
+
+  // 琶音 (Arpeggios)
+  major_arp:        { name: '大调琶音',     intervals: [0,4,7,12],    icon: '🎼', group: '琶音' },
+  minor_arp:        { name: '小调琶音',     intervals: [0,3,7,12],    icon: '🎵', group: '琶音' },
+  dim_arp:          { name: '减琶音',       intervals: [0,3,6,12],    icon: '🔻', group: '琶音' },
+  aug_arp:          { name: '增琶音',       intervals: [0,4,8,12],    icon: '🔺', group: '琶音' },
+  major7_arp:       { name: '大七琶音',     intervals: [0,4,7,11,12], icon: '🎶', group: '琶音' },
+  minor7_arp:       { name: '小七琶音',     intervals: [0,3,7,10,12], icon: '♪', group: '琶音' },
+  dom7_arp:         { name: '属七琶音',     intervals: [0,4,7,10,12], icon: '♫', group: '琶音' }
 };
 
 var ROOT_NOTES = [
@@ -339,7 +361,7 @@ var ScalePractice = (function() {
       groups[t.group].push({ key: typeKeys[i], name: t.name, icon: t.icon });
     }
     var typeOptions = '';
-    var groupNames = ['基础', '调式', '特殊'];
+    var groupNames = ['基础', '调式', '特殊', '和弦', '琶音'];
     for (var g = 0; g < groupNames.length; g++) {
       var gn = groupNames[g];
       if (!groups[gn]) continue;
@@ -427,7 +449,13 @@ var ScalePractice = (function() {
             '<div class="card-header"><span class="card-title">🎮 播放模式</span></div>' +
             '<div class="mode-cards" style="margin-bottom:16px">' +
               '<div class="mode-card' + (c.mode==='listen'?' active':'') + '" id="sModeListen" onclick="app.scalePractice.setMode(\'listen\')"><div class="mode-icon">👂</div><div class="mode-name">听音模式</div><div class="mode-desc">音阶自动播放</div></div>' +
-              '<div class="mode-card' + (c.mode==='follow'?' active':'') + '" id="sModeFollow" onclick="app.scalePractice.setMode(\'follow\')"><div class="mode-icon">🎯</div><div class="mode-name">跟练模式</div><div class="mode-desc">节拍器引导，逐音练习</div></div>' +
+              '<div class="mode-card' + (c.mode==='follow'?' active':'') + '" id="sModeFollow" onclick="app.scalePractice.setMode(\'follow\')"><div class="mode-icon">🎯</div><div class="mode-name">跟练模式</div><div class="mode-desc">节拍器引导，逐音确认</div></div>' +
+            '</div>' +
+            '<div class="usage-guide">' +
+              '<div class="usage-guide-title">📖 使用说明</div>' +
+              '<div class="usage-guide-item"><span class="usage-guide-icon">👂</span><div><strong>听音模式</strong>：音阶自动播放，跟随节拍器聆听音阶走向。适合初学者熟悉音阶结构。</div></div>' +
+              '<div class="usage-guide-item"><span class="usage-guide-icon">🎯</span><div><strong>跟练模式</strong>：节拍器引导，每个音符需要在应用上点击确认。适合在手机/平板上练习音阶识别。</div></div>' +
+              '<div class="usage-guide-item"><span class="usage-guide-icon">🎹</span><div><strong>实体钢琴跟练</strong>：选择听音模式 + 较慢BPM，跟着节拍器在实体钢琴上弹奏。应用播放音高作为参考，您在钢琴上同步弹奏。</div></div>' +
             '</div>' +
             '<div class="setting-row"><div><div class="setting-label">自适应速度</div><div class="setting-desc">连续通过后自动提升BPM</div></div><div class="toggle' + (c.adaptiveTempo?' active':'') + '" onclick="app.scalePractice.toggleOpt(\'adaptiveTempo\',this)"></div></div>' +
             (c.adaptiveTempo ?
@@ -822,42 +850,79 @@ var ScalePractice = (function() {
   ScalePractice.prototype._renderScalePiano = function(note) {
     var container = document.getElementById('scalePianoKeys');
     if (!container) return;
-    var whiteNotes = [
-      {name:'C',octave:3},{name:'D',octave:3},{name:'E',octave:3},{name:'F',octave:3},
-      {name:'G',octave:3},{name:'A',octave:3},{name:'B',octave:3},
-      {name:'C',octave:4},{name:'D',octave:4},{name:'E',octave:4},{name:'F',octave:4},
-      {name:'G',octave:4},{name:'A',octave:4},{name:'B',octave:4}
-    ];
-    var blackNotes = [
-      {name:'C#',octave:3,pos:0.6},{name:'D#',octave:3,pos:1.6},
-      {name:'F#',octave:3,pos:3.6},{name:'G#',octave:3,pos:4.6},{name:'A#',octave:3,pos:5.6},
-      {name:'C#',octave:4,pos:7.6},{name:'D#',octave:4,pos:8.6},
-      {name:'F#',octave:4,pos:10.6},{name:'G#',octave:4,pos:11.6},{name:'A#',octave:4,pos:12.6}
-    ];
+
+    // Calculate MIDI range from scale notes, extend by 4 white keys each side
+    var noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    var whiteNoteNames = ['C','D','E','F','G','A','B'];
+    var blackNotePattern = [1,1,0,1,1,1,0]; // 1=black key after this white key
+
+    var scaleMidiMin = 999, scaleMidiMax = 0;
+    if (this.currentNotes.length > 0) {
+      for (var i = 0; i < this.currentNotes.length; i++) {
+        var m = this.currentNotes[i].midi;
+        if (m < scaleMidiMin) scaleMidiMin = m;
+        if (m > scaleMidiMax) scaleMidiMax = m;
+      }
+    } else {
+      scaleMidiMin = this.config.rootMidi;
+      scaleMidiMax = this.config.rootMidi + 12;
+    }
+
+    // Extend by 4 white keys (approx 7 semitones) each side
+    var startMidi = Math.max(24, scaleMidiMin - 7); // C1 minimum
+    var endMidi = Math.min(96, scaleMidiMax + 7);    // C7 maximum
+
+    // Snap to C boundaries
+    var startOctave = Math.floor(startMidi / 12) - 1;
+    var startNoteIdx = startMidi % 12;
+    var endOctave = Math.floor(endMidi / 12) - 1;
+
+    // Build white key list
+    var whiteKeys = [];
+    for (var oct = startOctave; oct <= endOctave + 1; oct++) {
+      for (var wi = 0; wi < 7; wi++) {
+        var midi = (oct + 1) * 12 + [0,2,4,5,7,9,11][wi];
+        if (midi < startMidi - 2) continue;
+        if (midi > endMidi + 2) break;
+        whiteKeys.push({ name: whiteNoteNames[wi], octave: oct, midi: midi });
+      }
+      if (oct > endOctave) break;
+    }
+
     var keyWidth = 36;
-    container.style.width = (14 * keyWidth) + 'px';
+    var totalWidth = whiteKeys.length * keyWidth;
+    container.style.width = totalWidth + 'px';
     container.innerHTML = '';
-    for (var i = 0; i < whiteNotes.length; i++) {
-      var wn = whiteNotes[i];
+
+    // Render white keys
+    for (var i = 0; i < whiteKeys.length; i++) {
+      var wk = whiteKeys[i];
       var key = document.createElement('div');
       key.className = 'white-key';
       key.style.left = (i * keyWidth) + 'px';
-      if (note && note.name === wn.name && note.octave === wn.octave) key.classList.add('active');
+      if (note && note.name === wk.name && note.octave === wk.octave) key.classList.add('active');
       var label = document.createElement('span');
       label.className = 'key-label';
-      label.textContent = wn.name + wn.octave;
-      if (wn.name === 'C' && wn.octave === 4) { label.style.color = '#6c63ff'; label.style.fontWeight = 'bold'; key.style.borderLeft = '2px solid #6c63ff'; }
+      label.textContent = wk.name + wk.octave;
+      if (wk.name === 'C' && wk.octave === 4) { label.style.color = '#6c63ff'; label.style.fontWeight = 'bold'; key.style.borderLeft = '2px solid #6c63ff'; }
       key.appendChild(label);
-      key.addEventListener('click', (function(wn) { return function() { var entry = PIANO_NOTES[wn.name + wn.octave]; if (entry) audio.playNote(entry.freq, 1.5); }; })(wn));
+      key.addEventListener('click', (function(wk) { return function() { var entry = PIANO_NOTES[wk.name + wk.octave]; if (entry) audio.playNote(entry.freq, 1.5); }; })(wk));
       container.appendChild(key);
     }
-    for (var i = 0; i < blackNotes.length; i++) {
-      var bn = blackNotes[i];
-      var key = document.createElement('div');
-      key.className = 'black-key';
-      key.style.left = (bn.pos * keyWidth) + 'px';
-      key.addEventListener('click', (function(bn) { return function(e) { e.stopPropagation(); var entry = PIANO_NOTES[bn.name + bn.octave]; if (entry) audio.playNote(entry.freq, 1.5); }; })(bn));
-      container.appendChild(key);
+
+    // Render black keys
+    for (var i = 0; i < whiteKeys.length - 1; i++) {
+      var wk = whiteKeys[i];
+      var noteIdx = ['C','D','E','F','G','A','B'].indexOf(wk.name);
+      if (blackNotePattern[noteIdx]) {
+        var bk = document.createElement('div');
+        bk.className = 'black-key';
+        bk.style.left = ((i + 0.6) * keyWidth) + 'px';
+        var blackName = wk.name + '#';
+        var blackOctave = wk.octave;
+        bk.addEventListener('click', (function(blackName, blackOctave) { return function(e) { e.stopPropagation(); var entry = PIANO_NOTES[blackName + blackOctave]; if (entry) audio.playNote(entry.freq, 1.5); }; })(blackName, blackOctave));
+        container.appendChild(bk);
+      }
     }
   };
 

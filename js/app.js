@@ -81,6 +81,12 @@ class App {
   }
 
   showPage(page) {
+    // Stop scale practice metronome when leaving scale page
+    if (this.currentPage === 'scale' && this.scalePractice) {
+      if (this.scalePractice._countInMetro) { this.scalePractice._countInMetro.stop(); this.scalePractice._countInMetro = null; }
+      if (this.scalePractice.metronome) { this.scalePractice.metronome.stop(); this.scalePractice.metronome = null; }
+    }
+
     this.currentPage = page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
