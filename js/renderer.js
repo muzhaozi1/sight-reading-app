@@ -36,7 +36,7 @@ class ScoreRenderer {
   _svgDefs() {
     return '<defs>' +
       // Note gradient (neutral)
-      '<linearGradient id="noteGrad" x1="0" y1="0" x2="1" y2="1">' +
+      '<linearGradient id="noteGrad" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">' +
         '<stop offset="0%" stop-color="#f0f0ff"/>' +
         '<stop offset="100%" stop-color="#c8c8e0"/>' +
       '</linearGradient>' +
@@ -58,13 +58,6 @@ class ScoreRenderer {
       '<filter id="noteShadow" x="-20%" y="-20%" width="140%" height="140%">' +
         '<feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>' +
       '</filter>' +
-      // Staff line gradient
-      '<linearGradient id="staffLineGrad" x1="0" y1="0" x2="1" y2="0">' +
-        '<stop offset="0%" stop-color="#8888aa" stop-opacity="0.3"/>' +
-        '<stop offset="10%" stop-color="#8888aa" stop-opacity="1"/>' +
-        '<stop offset="90%" stop-color="#8888aa" stop-opacity="1"/>' +
-        '<stop offset="100%" stop-color="#8888aa" stop-opacity="0.3"/>' +
-      '</linearGradient>' +
     '</defs>';
   }
 
@@ -84,7 +77,7 @@ class ScoreRenderer {
     // Staff lines with gradient
     for (var i = 0; i < 5; i++) {
       var ly = staffTop + i * lineSpacing;
-      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="url(#staffLineGrad)" stroke-width="1.5"/>';
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
     }
 
     // Clef symbol
@@ -146,7 +139,7 @@ class ScoreRenderer {
     // Staff lines
     for (var i = 0; i < 5; i++) {
       var ly = staffTop + i * lineSpacing;
-      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="url(#staffLineGrad)" stroke-width="1.5"/>';
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
     }
 
     // Clef
