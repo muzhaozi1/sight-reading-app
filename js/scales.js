@@ -407,6 +407,7 @@ var ScalePractice = (function() {
     this.sessionStats = { startTime: 0, totalNotes: 0, correctNotes: 0, bpmHistory: [] };
     this._countInMetro = null;
     this._standaloneMetro = null;  // 独立节拍器
+    this._followDelayActive = false;
     this.practiceRound = 0;  // 练习次数计数
   }
 
@@ -719,6 +720,7 @@ var ScalePractice = (function() {
     if (this.currentNotes.length === 0) { showToast('无法生成音阶', 'error'); return; }
     this.currentIndex = -1;
     this.answerStates = new Array(this.currentNotes.length).fill(null);
+    this._followDelayActive = false;
     this.consecutiveCleanPasses = 0;
     this.currentPassCorrect = 0;
     this.currentPassTotal = 0;
@@ -893,6 +895,7 @@ var ScalePractice = (function() {
 
   ScalePractice.prototype.submitAnswer = function(noteName) {
     if (this.state !== 'PLAYING' || this.config.mode !== 'follow') return;
+    if (this._followDelayActive) return; // Prevent double-submit during delay
     var expected = this.currentNotes[this.currentIndex];
     var correct = (noteName === expected.name);
     this.sessionStats.totalNotes++;
@@ -909,8 +912,12 @@ var ScalePractice = (function() {
     }
     this._renderStaff(this.currentIndex);
     this._updateProgress();
+    this._followDelayActive = true;
     var self = this;
-    setTimeout(function() { self._advanceNote(); }, correct ? 200 : 600);
+    setTimeout(function() {
+      self._followDelayActive = false;
+      self._advanceNote();
+    }, 1000);
   };
 
   ScalePractice.prototype._onScaleComplete = function() {

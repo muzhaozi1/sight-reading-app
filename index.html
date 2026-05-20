@@ -2605,6 +2605,7 @@ var ScalePractice = (function() {
     this.sessionStats={startTime:0,totalNotes:0,correctNotes:0,bpmHistory:[]};
     this._countInMetro=null;
     this._standaloneMetro=null;
+    this._followDelayActive=false;
     this.practiceRound=0;
   }
   ScalePractice.prototype.renderSetup = function() {
@@ -2614,7 +2615,7 @@ var ScalePractice = (function() {
     var typeOptions=''; var groupNames=['音阶','调式','和弦','琶音'];
     for(var g=0;g<groupNames.length;g++){var gn=groupNames[g];if(!groups[gn])continue;typeOptions+='<optgroup label="'+gn+'">';for(var j=0;j<groups[gn].length;j++){var item=groups[gn][j];typeOptions+='<option value="'+item.key+'"'+(item.key===c.scaleType?' selected':'')+'>'+item.icon+' '+item.name+'</option>';}typeOptions+='</optgroup>';}
     var rootOptions='';for(var i=0;i<ROOT_NOTES.length;i++)rootOptions+='<option value="'+ROOT_NOTES[i].name+'"'+(ROOT_NOTES[i].name===c.rootNote?' selected':'')+'>'+ROOT_NOTES[i].name+'</option>';
-    var timeSigOptions='';var timeSigs=[[2,'2/4'],[3,'3/4'],[4,'4/4'],[5,'5/4'],[6,'6/8'],[7,'7/8']];for(var i=0;i<timeSigs.length;i++)timeSigOptions+='<option value="'+timeSigs[i][0]+'"'+(timeSigs[i][0]===c.timeSigBeats?' selected':'')+'>'+timeSigs[i][1]+'</option>';
+    var timeSigOptions='';var timeSigs=[[2,'2/4'],[3,'3/4'],[4,'4/4'],[5,'5/4'],[6,'6/8'],[7,'7/8'],[2,'2/2'],[3,'3/8'],[5,'5/8'],[8,'8/8'],[9,'9/8'],[12,'12/8']];for(var i=0;i<timeSigs.length;i++)timeSigOptions+='<option value="'+timeSigs[i][0]+'"'+(timeSigs[i][0]===c.timeSigBeats?' selected':'')+'>'+timeSigs[i][1]+'</option>';
     var subOptions='';var subs=[['quarter','四分音符 ♩'],['eighth','八分音符 ♪♪'],['triplet','三连音 ♪♪♪'],['sixteenth','十六分音符 ♬♬♬♬'],['q_e','前四后八 ♩♪'],['e_q','前八后四 ♪♩'],['e_s','前八后十六 ♪♬♬'],['s_e','前十六后八 ♬♬♪'],['dotted','附点 ♩.♪'],['rev_dotted','后附点 ♪♩.'],['syncopation','切分 ♬♩♬'],['swing','Swing ♩♪'],['shuffle','Shuffle ♪♪'],['compound_2','复合二拍 ♪♪♪'],['bossa','Bossa Nova'],['tresillo','Tresillo 3+3+2']];for(var i=0;i<subs.length;i++)subOptions+='<option value="'+subs[i][0]+'"'+(subs[i][0]===c.subdivision?' selected':'')+'>'+subs[i][1]+'</option>';
     document.getElementById('scaleSetup').innerHTML=
       '<div class="fade-in">'+
@@ -2636,6 +2637,11 @@ var ScalePractice = (function() {
               '<input type="range" id="bpmSlider" min="20" max="300" value="'+c.bpm+'" class="bpm-slider" oninput="app.scalePractice.setBpm(+this.value)">'+
               '<input type="number" id="bpmInput" min="20" max="300" value="'+c.bpm+'" class="bpm-input" onchange="app.scalePractice.setBpm(+this.value)">'+
               '<button class="btn btn-sm btn-outline" onclick="app.scalePractice.tapTempo()">TAP</button></div></div>'+
+            '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px 0">'+
+              [['Largo',40],['Adagio',66],['Andante',88],['Moderato',112],['Allegro',140],['Presto',180]].map(function(t){
+                return '<button class="btn btn-sm btn-outline" onclick="app.scalePractice.setBpm('+t[1]+')" style="padding:2px 8px;font-size:0.68rem">'+t[0]+' '+t[1]+'</button>';
+              }).join('')+
+            '</div>'+
             '<div class="setting-row"><div class="setting-label">拍号</div><select id="timeSig" class="scale-select" onchange="app.scalePractice.setTimeSig(+this.value)">'+timeSigOptions+'</select></div>'+
             '<div class="setting-row"><div class="setting-label">细分节拍</div><select id="subdivision" class="scale-select" onchange="app.scalePractice.config.subdivision=this.value">'+subOptions+'</select></div>'+
             '<div class="setting-row"><div class="setting-label">节拍类型</div><div id="beatTypeDots" class="beat-dots">'+this._renderBeatDots()+'</div></div>'+
@@ -2684,7 +2690,7 @@ var ScalePractice = (function() {
   ScalePractice.prototype.setMode = function(mode) { this.config.mode=mode; document.getElementById('sModeListen').classList.toggle('active',mode==='listen'); document.getElementById('sModeFollow').classList.toggle('active',mode==='follow'); };
   ScalePractice.prototype.setBpm = function(bpm) { this.config.bpm=Math.max(20,Math.min(300,bpm)); var s=document.getElementById('bpmSlider'),i=document.getElementById('bpmInput');if(s)s.value=this.config.bpm;if(i)i.value=this.config.bpm; };
   ScalePractice.prototype.tapTempo = function() { if(!this.metronome)this.metronome=new Metronome(audio.ctx); this.setBpm(this.metronome.tapTempo()); };
-  ScalePractice.prototype.setTimeSig = function(beats) { this.config.timeSigBeats=beats; if(this.metronome)this.metronome.setTimeSig(beats); var d=document.getElementById('beatTypeDots');if(d)d.innerHTML=this._renderBeatDots(); };
+  ScalePractice.prototype.setTimeSig = function(beats) { this.config.timeSigBeats=beats; if(this.metronome)this.metronome.setTimeSig(beats); var d=document.getElementById('beatTypeDots');if(d)d.innerHTML=this._renderBeatDots(); var bi=document.getElementById('metroBeatIndicator');if(bi)bi.innerHTML=this._renderBeatIndicatorDots(); };
   ScalePractice.prototype.toggleBeatType = function(index) { if(!this.metronome)this.metronome=new Metronome(audio.ctx); while(this.metronome.beatTypes.length<this.config.timeSigBeats)this.metronome.beatTypes.push('normal'); this.metronome.toggleBeatType(index); var d=document.getElementById('beatTypeDots');if(d)d.innerHTML=this._renderBeatDots(); };
   ScalePractice.prototype.toggleOpt = function(key,el) { this.config[key]=!this.config[key]; el.classList.toggle('active'); if(key==='adaptiveTempo')this.renderSetup(); };
   // === Standalone Metronome ===
@@ -2715,9 +2721,11 @@ var ScalePractice = (function() {
     if(s)s.value=bpm;if(d)d.textContent=bpm;if(bi)bi.value=bpm;if(bs)bs.value=bpm;
   };
   ScalePractice.prototype.start = function() {
+    // Stop standalone metronome if running
+    if(this._standaloneMetro){this._standaloneMetro.stop();this._standaloneMetro=null;}
     this.currentNotes=generateScaleNotes(this.config.rootMidi,this.config.scaleType,this.config.octaves);
     if(!this.currentNotes.length){showToast('无法生成音阶','error');return;}
-    this.currentIndex=-1; this.answerStates=new Array(this.currentNotes.length).fill(null);
+    this.currentIndex=-1; this.answerStates=new Array(this.currentNotes.length).fill(null); this._followDelayActive=false;
     this.consecutiveCleanPasses=0; this.currentPassCorrect=0; this.currentPassTotal=0;
     this.practiceRound++;
     this.sessionStats={startTime:Date.now(),totalNotes:0,correctNotes:0,bpmHistory:[this.config.bpm]};
@@ -2784,12 +2792,14 @@ var ScalePractice = (function() {
   ScalePractice.prototype._getSubsPerNote = function() { switch(this.config.subdivision){case 'eighth':return 2;case 'triplet':return 3;case 'sixteenth':return 4;default:return 1;} };
   ScalePractice.prototype.submitAnswer = function(noteName) {
     if(this.state!=='PLAYING'||this.config.mode!=='follow')return;
+    if(this._followDelayActive)return;
     var expected=this.currentNotes[this.currentIndex];var correct=(noteName===expected.name);
     this.sessionStats.totalNotes++;
     if(correct){this.sessionStats.correctNotes++;this.currentPassCorrect++;this.currentPassTotal++;audio.playCorrect();this.answerStates[this.currentIndex]='correct';}
     else{this.currentPassTotal++;audio.playWrong();this.answerStates[this.currentIndex]='wrong';}
     this._renderStaff(this.currentIndex);this._updateProgress();
-    var self=this;setTimeout(function(){self._advanceNote();},correct?200:600);
+    this._followDelayActive=true;
+    var self=this;setTimeout(function(){self._followDelayActive=false;self._advanceNote();},1000);
   };
   ScalePractice.prototype._onScaleComplete = function() {
     if(this.config.mode==='follow'&&this.config.adaptiveTempo){
@@ -2811,7 +2821,7 @@ var ScalePractice = (function() {
     this.state='SETUP';this.currentIndex=-1;this.currentNotes=[];this.answerStates=[];
     this.start();
   };
-  ScalePractice.prototype.stop = function() { if(this._countInMetro){this._countInMetro.stop();this._countInMetro=null;}if(this.metronome){this.metronome.stop();this.metronome=null;}if(this.sessionStats.startTime>0)this._recordSession();this.renderSetup(); };
+  ScalePractice.prototype.stop = function() { if(this._countInMetro){this._countInMetro.stop();this._countInMetro=null;}if(this.metronome){this.metronome.stop();this.metronome=null;}if(this._standaloneMetro){this._standaloneMetro.stop();this._standaloneMetro=null;}if(this.sessionStats.startTime>0)this._recordSession();this.renderSetup(); };
   ScalePractice.prototype._updateProgress = function() {
     var el=document.getElementById('sProgressText');if(el)el.textContent=(this.currentIndex+1)+'/'+this.currentNotes.length;
     if(this.config.mode==='follow'&&this.sessionStats.totalNotes>0){var a=document.getElementById('sAccuracyDisplay');if(a){a.style.display='flex';a.querySelector('.stat-value').textContent=Math.round((this.sessionStats.correctNotes/this.sessionStats.totalNotes)*100)+'%';}}
@@ -3153,6 +3163,15 @@ class App {
       var note = keyMap[e.key.toLowerCase()];
       if (note) { e.preventDefault(); this.submitAnswer(note); }
     });
+
+    // Stop standalone metronome when tab becomes hidden
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.currentPage === 'scale' && this.scalePractice && this.scalePractice._standaloneMetro) {
+        this.scalePractice._standaloneMetro.stop();
+        this.scalePractice._standaloneMetro = null;
+        showToast('节拍器已自动停止（离开页面）', 'info');
+      }
+    });
   }
 
   showPage(page) {
@@ -3303,6 +3322,9 @@ class App {
           '</div>' +
           '<div class="mode-card" id="mode-listen" onclick="app.selectMode(\'listen\')">' +
             '<div class="mode-icon">👂</div><div class="mode-name">听音辨位</div><div class="mode-desc">听音高选择正确音名</div>' +
+          '</div>' +
+          '<div class="mode-card" id="mode-chord" onclick="app.selectMode(\'chord\')">' +
+            '<div class="mode-icon">🎹</div><div class="mode-name">和弦辨识</div><div class="mode-desc">听和声选择和弦类型</div>' +
           '</div>' +
         '</div>' +
 
@@ -3546,12 +3568,18 @@ class App {
       sprintTimer: null,
       currentNote: null,
       answered: false,
-      results: []
+      results: [],
+      chordBpm: 100,
+      currentChord: null,
+      chordOptions: [],
+      _recentChords: []
     };
 
     this.renderPracticeUI();
-    this.renderer = new ScoreRenderer('scoreCanvas');
-    this.renderer.init(420, 150);
+    if (this.selectedMode !== 'chord') {
+      this.renderer = new ScoreRenderer('scoreCanvas');
+      this.renderer.init(420, 150);
+    }
     this.nextQuestion();
   }
 
@@ -3570,41 +3598,63 @@ class App {
           '<div class="stat-item score">正确 <span class="stat-value" id="scoreText">' + ps.correct + '</span></div>' +
         '</div>' +
 
-        '<div class="practice-hint-bar">' +
-          '<label class="hint-toggle"><input type="checkbox" id="chkSolfege" ' + (showSolfege?'checked':'') + ' onchange="app.togglePracticeHint(\'solfege\')"> 唱名</label>' +
-          '<label class="hint-toggle"><input type="checkbox" id="chkPiano" ' + (showPiano?'checked':'') + ' onchange="app.togglePracticeHint(\'piano\')"> 键位</label>' +
-          '<span style="margin-left:auto;display:flex;gap:4px;align-items:center">' +
-            '<span style="font-size:0.72rem;color:var(--text3);margin-right:4px">音色</span>' +
-            Object.keys(audio.presets).map(function(k) {
-              var p = audio.presets[k];
-              var active = audio.preset === k;
-              return '<button class="btn btn-sm ' + (active?'btn-primary':'btn-outline') + '" onclick="app.switchSound(\'' + k + '\')" style="padding:3px 8px;font-size:0.7rem">' + p.icon + '</button>';
+        (ps.mode === 'chord'
+          ? // ===== CHORD MODE UI =====
+          '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px;flex-wrap:wrap">' +
+            '<button class="btn btn-sm btn-outline" onclick="app.replayChord()" style="font-size:0.82rem">🔊 重播</button>' +
+            '<div style="display:flex;align-items:center;gap:6px">' +
+              '<span style="font-size:0.72rem;color:var(--text3)">BPM</span>' +
+              '<input type="range" id="chordBpmSlider" min="40" max="200" value="' + (ps.chordBpm||100) + '" style="width:100px" oninput="app.setChordBpm(+this.value)">' +
+              '<span id="chordBpmDisplay" style="font-size:0.82rem;color:var(--warning);font-weight:600;min-width:32px">' + (ps.chordBpm||100) + '</span>' +
+            '</div>' +
+            '<div style="display:flex;gap:3px">' +
+              [['慢',60],['中',100],['快',140]].map(function(t){
+                return '<button class="btn btn-sm btn-outline" onclick="app.setChordBpm('+t[1]+')" style="padding:2px 8px;font-size:0.68rem">'+t[0]+'</button>';
+              }).join('')+
+            '</div>' +
+          '</div>' +
+          '<div id="questionTimer" style="display:none;position:relative;width:52px;height:52px;margin:0 auto 8px">' +
+            '<svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" fill="none" stroke="#333" stroke-width="3"/><circle id="timerCircle" cx="26" cy="26" r="22" fill="none" stroke="var(--success)" stroke-width="3" stroke-dasharray="138.2" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 26 26)"/></svg>' +
+            '<span id="timerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0.9rem;font-weight:700;color:var(--text)"></span>' +
+          '</div>' +
+          '<div class="score-display" id="scoreDisplay" style="padding:12px 16px;min-height:180px">' +
+            '<div id="chordStaffCanvas" style="width:100%;min-height:160px;display:flex;justify-content:center;align-items:center"></div>' +
+            '<span class="hint" id="clefHint"></span>' +
+          '</div>' +
+          '<div class="answer-options" id="answerOptions" style="display:flex;gap:10px;justify-content:center;padding:0 8px">' +
+            '<div id="chordOptionsContainer" style="display:flex;gap:10px;justify-content:center;width:100%"></div>' +
+          '</div>'
+          : // ===== NOTE MODE UI =====
+          '<div class="practice-hint-bar">' +
+            '<label class="hint-toggle"><input type="checkbox" id="chkSolfege" ' + (showSolfege?'checked':'') + ' onchange="app.togglePracticeHint(\'solfege\')"> 唱名</label>' +
+            '<label class="hint-toggle"><input type="checkbox" id="chkPiano" ' + (showPiano?'checked':'') + ' onchange="app.togglePracticeHint(\'piano\')"> 键位</label>' +
+            '<span style="margin-left:auto;display:flex;gap:4px;align-items:center">' +
+              '<span style="font-size:0.72rem;color:var(--text3);margin-right:4px">音色</span>' +
+              Object.keys(audio.presets).map(function(k) {
+                var p = audio.presets[k];
+                var active = audio.preset === k;
+                return '<button class="btn btn-sm ' + (active?'btn-primary':'btn-outline') + '" onclick="app.switchSound(\'' + k + '\')" style="padding:3px 8px;font-size:0.7rem">' + p.icon + '</button>';
+              }).join('') +
+            '</span>' +
+            (ps.mode === 'listen' ? '<button class="btn btn-sm btn-outline" onclick="app.replayNote()" style="margin-left:8px">🔊 重播</button>' : '') +
+          '</div>' +
+          '<div id="questionTimer" style="display:none;position:relative;width:52px;height:52px;margin:0 auto 8px">' +
+            '<svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" fill="none" stroke="#333" stroke-width="3"/><circle id="timerCircle" cx="26" cy="26" r="22" fill="none" stroke="var(--success)" stroke-width="3" stroke-dasharray="138.2" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 26 26)"/></svg>' +
+            '<span id="timerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0.9rem;font-weight:700;color:var(--text)"></span>' +
+          '</div>' +
+          '<div class="score-display" id="scoreDisplay">' +
+            '<div id="scoreCanvas" style="width:100%;display:flex;justify-content:center"></div>' +
+            '<span class="hint" id="clefHint"></span>' +
+            '<span id="solfegeDisplay" style="display:' + (showSolfege?'block':'none') + ';text-align:center;font-size:1.1rem;color:var(--purple);margin-top:6px"></span>' +
+          '</div>' +
+          '<div class="answer-options" id="answerOptions">' +
+            NOTES.map(function(n) {
+              return '<button class="answer-btn" data-note="' + n + '" onclick="app.submitAnswer(\'' + n + '\')">' +
+                '<span style="color:' + NOTE_COLORS[n] + '">' + n + '</span>' +
+                '</button>';
             }).join('') +
-          '</span>' +
-          (ps.mode === 'listen' ? '<button class="btn btn-sm btn-outline" onclick="app.replayNote()" style="margin-left:8px">🔊 重播</button>' : '') +
-        '</div>' +
-
-        '<div id="questionTimer" style="display:none;position:relative;width:52px;height:52px;margin:0 auto 8px">' +
-          '<svg width="52" height="52" viewBox="0 0 52 52">' +
-            '<circle cx="26" cy="26" r="22" fill="none" stroke="#333" stroke-width="3"/>' +
-            '<circle id="timerCircle" cx="26" cy="26" r="22" fill="none" stroke="var(--success)" stroke-width="3" stroke-dasharray="138.2" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 26 26)"/>' +
-          '</svg>' +
-          '<span id="timerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0.9rem;font-weight:700;color:var(--text)"></span>' +
-        '</div>' +
-
-        '<div class="score-display" id="scoreDisplay">' +
-          '<div id="scoreCanvas" style="width:100%;display:flex;justify-content:center"></div>' +
-          '<span class="hint" id="clefHint"></span>' +
-          '<span id="solfegeDisplay" style="display:' + (showSolfege?'block':'none') + ';text-align:center;font-size:1.1rem;color:var(--purple);margin-top:6px"></span>' +
-        '</div>' +
-
-        '<div class="answer-options" id="answerOptions">' +
-          NOTES.map(function(n) {
-            return '<button class="answer-btn" data-note="' + n + '" onclick="app.submitAnswer(\'' + n + '\')">' +
-              '<span style="color:' + NOTE_COLORS[n] + '">' + n + '</span>' +
-              '</button>';
-          }).join('') +
-        '</div>' +
+          '</div>'
+        ) +
 
         '<div class="piano-container" id="pianoContainer" style="display:' + (showPiano?'block':'none') + '"><div class="piano" id="pianoKeys"></div></div>' +
       '</div>';
@@ -3631,6 +3681,12 @@ class App {
 
     ps.answered = false;
     ps.current++;
+
+    // === CHORD MODE ===
+    if (ps.mode === 'chord') {
+      this._nextChordQuestion();
+      return;
+    }
 
     // Initialize recent notes tracker
     if (!ps._recentNotes) ps._recentNotes = [];
@@ -3777,6 +3833,207 @@ class App {
     }, correct ? 600 : 1200);
   }
 
+  // ===== CHORD MODE =====
+  _nextChordQuestion() {
+    var ps = this.practiceState;
+    var types = [
+      { key: 'major_triad',  name: '大三和弦', icon: '△', intervals: [0,4,7] },
+      { key: 'minor_triad',  name: '小三和弦', icon: 'm', intervals: [0,3,7] },
+      { key: 'dim_triad',    name: '减三和弦', icon: '°', intervals: [0,3,6] },
+      { key: 'aug_triad',    name: '增三和弦', icon: '+', intervals: [0,4,8] },
+      { key: 'major7',       name: '大七和弦', icon: '△⁷', intervals: [0,4,7,11] },
+      { key: 'minor7',       name: '小七和弦', icon: 'm⁷', intervals: [0,3,7,10] },
+      { key: 'dom7',         name: '属七和弦', icon: '⁷', intervals: [0,4,7,10] },
+    ];
+    // Pick root note C4-B4
+    var rootMidi = 60 + randomInt(0, 11);
+    // Pick chord type, avoid recent repeats
+    if (!ps._recentChords) ps._recentChords = [];
+    var chordType = types[randomInt(0, types.length - 1)];
+    var attempts = 0;
+    while (ps._recentChords.indexOf(chordType.key) >= 0 && attempts < 10) {
+      chordType = types[randomInt(0, types.length - 1)];
+      attempts++;
+    }
+    ps._recentChords.push(chordType.key);
+    if (ps._recentChords.length > 3) ps._recentChords.shift();
+    // Build freq array
+    var chordFreqs = chordType.intervals.map(function(iv) {
+      return 440 * Math.pow(2, (rootMidi + iv - 69) / 12);
+    });
+    ps.currentChord = { rootMidi: rootMidi, chordType: chordType, chordFreqs: chordFreqs };
+    ps.questionStartTime = Date.now();
+    // Build 4 options: 1 correct + 3 random wrong
+    var wrong = types.filter(function(c) { return c.key !== chordType.key; });
+    wrong.sort(function() { return Math.random() - 0.5; });
+    var allOpts = [chordType].concat(wrong.slice(0, 3));
+    allOpts.sort(function() { return Math.random() - 0.5; });
+    ps.chordOptions = allOpts;
+    // Update UI
+    this.updatePracticeBar();
+    var staffEl = document.getElementById('chordStaffCanvas');
+    if (staffEl) staffEl.innerHTML = '<div style="color:var(--text3);font-size:0.95rem;padding:40px 0;letter-spacing:1px">♪ 逐音播放中，请仔细听…</div>';
+    var hintEl = document.getElementById('clefHint');
+    if (hintEl) hintEl.textContent = '♪ 听和弦，选择类型';
+    // Render chord option buttons
+    var optContainer = document.getElementById('chordOptionsContainer');
+    if (optContainer) {
+      optContainer.innerHTML = allOpts.map(function(opt) {
+        return '<button class="answer-btn chord-btn" data-chord="' + opt.key + '" onclick="app.submitChordAnswer(\'' + opt.key + '\')" style="flex:1;padding:16px 6px;text-align:center;border-radius:12px;min-width:0">' +
+          '<div style="font-weight:800;font-size:1.4rem;line-height:1">' + opt.icon + '</div>' +
+          '<div style="font-size:0.78rem;margin-top:6px;color:var(--text2);white-space:nowrap">' + opt.name + '</div></button>';
+      }).join('');
+    }
+    // Disable options until playback finishes
+    document.querySelectorAll('#chordOptionsContainer .answer-btn').forEach(function(b) { b.disabled = true; b.style.opacity = '0.5'; });
+    this.startQuestionTimer();
+    // Play notes one by one, then enable options
+    this._playChordSequential(chordFreqs, function() {
+      document.querySelectorAll('#chordOptionsContainer .answer-btn').forEach(function(b) { b.disabled = false; b.style.opacity = '1'; });
+      var el = document.getElementById('chordStaffCanvas');
+      if (el) el.innerHTML = '<div style="color:var(--primary2);font-size:0.95rem;padding:40px 0;font-weight:600">♪ 播放完毕，请选择和弦类型</div>';
+    });
+  }
+
+  _playChordSequential(freqs, onDone) {
+    if (!audio.enabled) { if (onDone) onDone(); return; }
+    audio.init(); audio.resume();
+    var ctx = audio.ctx;
+    var ps = this.practiceState;
+    var bpm = (ps && ps.chordBpm) ? ps.chordBpm : 100;
+    // BPM = beats per minute, each note = 1 beat
+    var secPerBeat = 60.0 / bpm;         // e.g. BPM=100 → 0.6s per note
+    var noteDur = secPerBeat * 0.85;      // note sustains 85% of beat
+    var gap = secPerBeat;                 // next note starts exactly on next beat
+    var idx = 0;
+    function playNext() {
+      if (idx >= freqs.length) { if (onDone) onDone(); return; }
+      var freq = freqs[idx]; idx++;
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.25, now + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, now + noteDur);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + noteDur + 0.05);
+      setTimeout(playNext, gap * 1000);
+    }
+    playNext();
+  }
+
+  replayChord() {
+    var ps = this.practiceState;
+    if (!ps || !ps.currentChord) return;
+    // Disable options during replay
+    document.querySelectorAll('#chordOptionsContainer .answer-btn').forEach(function(b) { b.disabled = true; b.style.opacity = '0.5'; });
+    var staffEl = document.getElementById('chordStaffCanvas');
+    if (staffEl) staffEl.innerHTML = '<div style="color:var(--text3);font-size:0.95rem;padding:40px 0;letter-spacing:1px">♪ 重播中…</div>';
+    this._playChordSequential(ps.currentChord.chordFreqs, function() {
+      document.querySelectorAll('#chordOptionsContainer .answer-btn').forEach(function(b) { b.disabled = false; b.style.opacity = '1'; });
+      var el = document.getElementById('chordStaffCanvas');
+      if (el) el.innerHTML = '<div style="color:var(--primary2);font-size:0.95rem;padding:40px 0;font-weight:600">♪ 播放完毕，请选择</div>';
+    });
+  }
+
+  setChordBpm(bpm) {
+    var ps = this.practiceState;
+    if (!ps) return;
+    ps.chordBpm = Math.max(40, Math.min(200, bpm));
+    var slider = document.getElementById('chordBpmSlider');
+    var display = document.getElementById('chordBpmDisplay');
+    if (slider) slider.value = ps.chordBpm;
+    if (display) display.textContent = ps.chordBpm;
+  }
+
+  submitChordAnswer(answerKey) {
+    var ps = this.practiceState;
+    if (!ps || ps.answered) return;
+    ps.answered = true;
+    this.stopQuestionTimer();
+    var responseTime = Date.now() - ps.questionStartTime;
+    var correct = !!answerKey && answerKey === ps.currentChord.chordType.key;
+    ps.responseTimes.push(responseTime);
+    ps.results.push({ chord: ps.currentChord, answer: answerKey, correct: correct, time: responseTime });
+    if (correct) {
+      ps.correct++; ps.combo++;
+      if (ps.combo > ps.maxCombo) ps.maxCombo = ps.combo;
+      audio.playCorrect();
+      var btn = document.querySelector('.answer-btn[data-chord="' + answerKey + '"]');
+      if (btn) btn.classList.add('correct');
+      this._spawnParticles(btn);
+      if (ps.combo > 0 && ps.combo % 10 === 0) { audio.playCombo(ps.combo); this.showComboFlash(ps.combo); }
+    } else {
+      ps.combo = 0; audio.playWrong();
+      if (answerKey) { var wb = document.querySelector('.answer-btn[data-chord="' + answerKey + '"]'); if (wb) wb.classList.add('wrong'); }
+      var cb = document.querySelector('.answer-btn[data-chord="' + ps.currentChord.chordType.key + '"]');
+      if (cb) cb.classList.add('correct');
+    }
+    this.updatePracticeBar();
+    document.querySelectorAll('.answer-btn').forEach(function(b) { b.disabled = true; });
+    this._renderChordStaff(correct);
+    var self = this;
+    setTimeout(function() { self.nextQuestion(); }, correct ? 1200 : 2000);
+  }
+
+  _renderChordStaff(isCorrect) {
+    var ps = this.practiceState;
+    if (!ps || !ps.currentChord) return;
+    var container = document.getElementById('chordStaffCanvas');
+    if (!container) return;
+    var chord = ps.currentChord;
+    var noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    var noteOrder = {C:0,D:1,E:2,F:3,G:4,A:5,B:6};
+    var w = 420, h = 200, staffLeft = 60, staffRight = w - 30, staffTop = 55, lineSpacing = 12;
+    var color = isCorrect ? '#4ade80' : '#f87171';
+    var notes = chord.chordType.intervals.map(function(iv) {
+      var midi = chord.rootMidi + iv;
+      var nm = noteNames[midi % 12];
+      var oct = Math.floor(midi / 12) - 1;
+      var acc = nm.indexOf('#') >= 0;
+      return { name: nm[0], displayName: nm, octave: oct, midi: midi, accidental: acc };
+    });
+    function noteToY(n) {
+      var pos = noteOrder[n.name] + (n.octave - 4) * 7;
+      return staffTop + (10 - pos) * (lineSpacing / 2);
+    }
+    var svg = '<svg width="100%" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<defs><filter id="cG" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/><feFlood flood-color="' + color + '" flood-opacity="0.5"/><feComposite in2="b" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+    // 5 staff lines
+    for (var i = 0; i < 5; i++) {
+      var ly = staffTop + i * lineSpacing;
+      svg += '<line x1="' + staffLeft + '" y1="' + ly + '" x2="' + staffRight + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+    }
+    // Treble clef
+    svg += '<text x="' + (staffLeft + 5) + '" y="' + (staffTop + 42) + '" font-size="48" fill="#aaa" font-family="serif" opacity="0.8">&#119070;</text>';
+    // Chord label
+    svg += '<text x="' + (w / 2) + '" y="' + (staffTop - 14) + '" text-anchor="middle" font-size="15" fill="' + color + '" font-weight="bold">' + chord.chordType.icon + ' ' + chord.chordType.name + '</text>';
+    // Notes
+    var x0 = staffLeft + 90, gap = 55;
+    for (var n = 0; n < notes.length; n++) {
+      var note = notes[n], x = x0 + n * gap, y = noteToY(note);
+      // Ledger lines
+      var sb = staffTop + 4 * lineSpacing;
+      if (y > sb) for (var ly = sb + lineSpacing; ly <= y + 2; ly += lineSpacing) svg += '<line x1="' + (x-14) + '" y1="' + ly + '" x2="' + (x+14) + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+      if (y < staffTop) for (var ly = staffTop - lineSpacing; ly >= y - 2; ly -= lineSpacing) svg += '<line x1="' + (x-14) + '" y1="' + ly + '" x2="' + (x+14) + '" y2="' + ly + '" stroke="#8888aa" stroke-width="1.5"/>';
+      svg += '<g filter="url(#cG)">';
+      svg += '<ellipse cx="' + x + '" cy="' + y + '" rx="10" ry="7.5" fill="' + color + '" stroke="' + color + '" stroke-width="1" transform="rotate(-15,' + x + ',' + y + ')"/>';
+      var up = y > (staffTop + 2 * lineSpacing);
+      svg += up
+        ? '<line x1="' + (x+9) + '" y1="' + (y-1) + '" x2="' + (x+9) + '" y2="' + (y-40) + '" stroke="' + color + '" stroke-width="1.8"/>'
+        : '<line x1="' + (x-9) + '" y1="' + (y+1) + '" x2="' + (x-9) + '" y2="' + (y+40) + '" stroke="' + color + '" stroke-width="1.8"/>';
+      if (note.accidental) svg += '<text x="' + (x-24) + '" y="' + (y+6) + '" font-size="16" fill="' + color + '" font-family="serif">&#9839;</text>';
+      svg += '<text x="' + x + '" y="' + (staffTop + 5*lineSpacing + 16) + '" text-anchor="middle" font-size="10" fill="' + color + '" font-weight="600">' + note.displayName + note.octave + '</text>';
+      svg += '</g>';
+    }
+    svg += '</svg>';
+    container.innerHTML = svg;
+  }
+
   _spawnParticles(btn) {
     if (!btn) return;
     var rect = btn.getBoundingClientRect();
@@ -3819,8 +4076,8 @@ class App {
     var circleEl = document.getElementById('timerCircle');
     var textEl = document.getElementById('timerText');
 
-    // Only show if timeLimit is enabled and not sprint mode
-    if (!this.settings.timeLimit || ps.mode === 'sprint') {
+    // Only show if timeLimit is enabled and not sprint/chord mode
+    if (!this.settings.timeLimit || ps.mode === 'sprint' || ps.mode === 'chord') {
       if (timerEl) timerEl.style.display = 'none';
       return;
     }
@@ -3874,7 +4131,10 @@ class App {
       if (remaining <= 0) {
         clearInterval(ps.questionTimerInterval);
         ps.questionTimerInterval = null;
-        if (!ps.answered) self.submitAnswer(null);
+        if (!ps.answered) {
+          if (ps.mode === 'chord') { self.submitChordAnswer(null); }
+          else { self.submitAnswer(null); }
+        }
       }
     }, 50); // Update every 50ms for smooth animation
   }
@@ -3955,32 +4215,55 @@ class App {
 
     audio.playFanfare();
 
-    // Per-note breakdown
-    var noteBreakdown = {};
-    ps.results.forEach(function(r) {
-      var n = r.note.name;
-      if (!noteBreakdown[n]) noteBreakdown[n] = { correct: 0, total: 0 };
-      noteBreakdown[n].total++;
-      if (r.correct) noteBreakdown[n].correct++;
-    });
-
     var icon = accuracy >= 90 ? '🎉' : accuracy >= 70 ? '👍' : '💪';
     var title = accuracy >= 90 ? '太棒了！' : accuracy >= 70 ? '做得不错！' : '继续加油！';
-    var modeNames = { flash:'闪卡速认', sprint:'计时冲刺', clef_switch:'双谱切换', listen:'听音辨位' };
+    var modeNames = { flash:'闪卡速认', sprint:'计时冲刺', clef_switch:'双谱切换', listen:'听音辨位', chord:'和弦辨识' };
     var self = this;
 
-    var breakdownHTML = NOTES.map(function(n) {
-      var bd = noteBreakdown[n];
-      if (!bd) return '';
-      var pct = Math.round((bd.correct / bd.total) * 100);
-      var color = NOTE_COLORS[n];
-      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
-        '<span style="width:20px;font-weight:700;color:' + color + '">' + n + '</span>' +
-        '<div class="weak-note-bar" style="flex:1"><div class="weak-note-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
-        '<span style="width:40px;font-size:0.8rem;color:var(--text2)">' + pct + '%</span>' +
-        '<span style="width:50px;font-size:0.75rem;color:var(--text3)">' + bd.correct + '/' + bd.total + '</span>' +
-      '</div>';
-    }).join('');
+    var breakdownHTML = '';
+    var breakdownTitle = '';
+    if (ps.mode === 'chord') {
+      breakdownTitle = '各和弦类型正确率';
+      var chordBreakdown = {};
+      ps.results.forEach(function(r) {
+        var key = r.chord.chordType.key;
+        if (!chordBreakdown[key]) chordBreakdown[key] = { name: r.chord.chordType.name, icon: r.chord.chordType.icon, correct: 0, total: 0 };
+        chordBreakdown[key].total++;
+        if (r.correct) chordBreakdown[key].correct++;
+      });
+      Object.keys(chordBreakdown).forEach(function(key) {
+        var bd = chordBreakdown[key];
+        var pct = Math.round((bd.correct / bd.total) * 100);
+        breakdownHTML += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+          '<span style="width:60px;font-weight:700">' + bd.icon + ' ' + bd.name + '</span>' +
+          '<div class="weak-note-bar" style="flex:1"><div class="weak-note-bar-fill" style="width:' + pct + '%;background:var(--primary)"></div></div>' +
+          '<span style="width:40px;font-size:0.8rem;color:var(--text2)">' + pct + '%</span>' +
+          '<span style="width:50px;font-size:0.75rem;color:var(--text3)">' + bd.correct + '/' + bd.total + '</span>' +
+        '</div>';
+      });
+    } else {
+      breakdownTitle = '各音符正确率';
+      var noteBreakdown = {};
+      ps.results.forEach(function(r) {
+        if (!r.note) return;
+        var n = r.note.name;
+        if (!noteBreakdown[n]) noteBreakdown[n] = { correct: 0, total: 0 };
+        noteBreakdown[n].total++;
+        if (r.correct) noteBreakdown[n].correct++;
+      });
+      NOTES.forEach(function(n) {
+        var bd = noteBreakdown[n];
+        if (!bd) return;
+        var pct = Math.round((bd.correct / bd.total) * 100);
+        var color = NOTE_COLORS[n];
+        breakdownHTML += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+          '<span style="width:20px;font-weight:700;color:' + color + '">' + n + '</span>' +
+          '<div class="weak-note-bar" style="flex:1"><div class="weak-note-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+          '<span style="width:40px;font-size:0.8rem;color:var(--text2)">' + pct + '%</span>' +
+          '<span style="width:50px;font-size:0.75rem;color:var(--text3)">' + bd.correct + '/' + bd.total + '</span>' +
+        '</div>';
+      });
+    }
 
     document.getElementById('practiceArea').innerHTML =
       '<div class="results-panel fade-in">' +
@@ -3993,7 +4276,7 @@ class App {
           '<div class="result-stat"><div class="result-stat-value" style="color:var(--pink)">' + ps.maxCombo + 'x</div><div class="result-stat-label">最大连击</div></div>' +
         '</div>' +
         '<div class="card" style="text-align:left;max-width:400px;margin:0 auto 20px">' +
-          '<div class="card-title" style="margin-bottom:10px">各音符正确率</div>' + breakdownHTML +
+          '<div class="card-title" style="margin-bottom:10px">' + breakdownTitle + '</div>' + breakdownHTML +
         '</div>' +
         '<div style="margin-top:12px"><span class="badge badge-level">EXP +' + (ps.correct*10) + '</span></div>' +
         '<div style="display:flex;gap:12px;justify-content:center;margin-top:24px">' +
@@ -4047,7 +4330,7 @@ class App {
 
     var historyHTML = '';
     if (stats.data.history.length > 0) {
-      var modeNames = { flash:'闪卡', sprint:'冲刺', clef_switch:'双谱', listen:'听音' };
+      var modeNames = { flash:'闪卡', sprint:'冲刺', clef_switch:'双谱', listen:'听音', chord:'和弦' };
       historyHTML = '<div style="overflow-x:auto"><table style="width:100%;font-size:0.8rem;border-collapse:collapse"><thead>' +
         '<tr style="color:var(--text3);border-bottom:1px solid var(--border)"><th style="text-align:left;padding:8px">日期</th><th style="text-align:left;padding:8px">模式</th><th style="text-align:left;padding:8px">难度</th><th style="text-align:right;padding:8px">正确率</th><th style="text-align:right;padding:8px">反应</th><th style="text-align:right;padding:8px">连击</th></tr></thead><tbody>';
       stats.data.history.slice(0,20).forEach(function(h) {
